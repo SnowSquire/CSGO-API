@@ -1,11 +1,16 @@
-import { saveDataJson } from "../utils/saveDataJson.js";
-import { $t, languageData } from "./translations.js";
-import { state } from "./main.js";
-import specialNotes from "../utils/specialNotes.json" with { type: "json" };
-import { getRarityColor } from "../utils/index.js";
 import { getImageUrl } from "../constants.js";
+import { getRarityColor } from "../utils/index.js";
+import { saveDataJson } from "../utils/saveDataJson.js";
+import specialNotes from "../utils/specialNotes.json" with { type: "json" };
+import { state } from "./main.js";
+import { $t, languageData } from "./translations.js";
 
-const isSticker = item => {
+function isSticker(item: {
+    sticker_material: string | undefined;
+    object_id: string;
+    item_name: string;
+    name: string | string[];
+}) {
     if (item.sticker_material === undefined) {
         return false;
     }
@@ -43,13 +48,13 @@ const isSticker = item => {
     }
 
     return true;
-};
+}
 
-const getDescription = () => {
+function getDescription() {
     return `${$t("keychain_kc_sticker_display_case_desc")}<br><br>${$t("csgo_tool_keychain_desc")}`;
-};
+}
 
-const getType = item => {
+function getType(item: { tournament_player_id: any; tournament_team_id: any; tournament_event_id: any }) {
     if (item.tournament_player_id) {
         return "Autograph";
     }
@@ -63,9 +68,9 @@ const getType = item => {
     }
 
     return "Other";
-};
+}
 
-const getEffect = item => {
+function getEffect(item: { item_name: any }) {
     if ($t(item.item_name, true).includes("(Holo)") || $t(item.item_name, true).includes("(Holo, ")) {
         return "Holo";
     }
@@ -94,9 +99,9 @@ const getEffect = item => {
     }
 
     return "Other";
-};
+}
 
-const getMarketHashName = item => {
+function getMarketHashName(item) {
     // 1 - DreamHack 2013
     if (item.tournament_event_id === 1) {
         return null;
@@ -145,9 +150,9 @@ const getMarketHashName = item => {
     }
 
     return `${$t("keychain_kc_sticker_display_case", true)} | ${$t(item.item_name, true)}`;
-};
+}
 
-const parseItem = item => {
+function parseItem(item) {
     const { cratesBySkins, proTeams, proPlayers, collectionsByStickers, cdnImages } = state;
 
     const image =
@@ -210,13 +215,13 @@ const parseItem = item => {
             image_inventory: `econ/stickers/${item.sticker_material.toLowerCase()}_1355_37`,
         },
     };
-};
+}
 
-export const getStickerSlabs = () => {
+export function getStickerSlabs() {
     const { stickerKits } = state;
     const { folder } = languageData;
 
     const stickers = stickerKits.filter(isSticker).map(parseItem);
 
     saveDataJson(`./public/api/${folder}/sticker_slabs.json`, stickers);
-};
+}

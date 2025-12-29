@@ -1,9 +1,9 @@
-import { saveDataJson } from "../utils/saveDataJson.js";
-import { $t, languageData } from "./translations.js";
 import { getImageUrl } from "../constants.js";
+import { saveDataJson } from "../utils/saveDataJson.js";
 import { state } from "./main.js";
+import { $t, languageData } from "./translations.js";
 
-export const getTools = () => {
+export function getTools() {
     const { cdnImages } = state;
     const { folder } = languageData;
 
@@ -53,4 +53,4 @@ export const getTools = () => {
     ];
 
     saveDataJson(`./public/api/${folder}/tools.json`, tools);
-};
+}
