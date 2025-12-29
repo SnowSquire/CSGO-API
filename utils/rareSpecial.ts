@@ -745,4 +745,4 @@ export const rareSpecial = {
         "[so_purple]weapon_knife_outdoor": 1,
         "[aq_steel_knife]weapon_knife_outdoor": 1,
     },
-};
+} as const;

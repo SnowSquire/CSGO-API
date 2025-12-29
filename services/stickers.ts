@@ -1,11 +1,11 @@
-import { saveDataJson } from "../utils/saveDataJson.js";
-import { $t, languageData } from "./translations.js";
-import { state } from "./main.js";
-import specialNotes from "../utils/specialNotes.json" with { type: "json" };
-import { getRarityColor } from "../utils/index.js";
 import { getImageUrl } from "../constants.js";
+import { getRarityColor } from "../utils/index.js";
+import { saveDataJson } from "../utils/saveDataJson.js";
+import specialNotes from "../utils/specialNotes.json" with { type: "json" };
+import { state } from "./main.js";
+import { $t, languageData } from "./translations.js";
 
-const isSticker = item => {
+function isSticker(item) {
     if (item.sticker_material === undefined) {
         return false;
     }
@@ -43,22 +43,22 @@ const isSticker = item => {
     }
 
     return true;
-};
+}
 
-const getDescription = item => {
+function getDescription(item) {
     const commemoratesText = item.tournament_event_id
         ? `<span style='color:#ffd700;'>${$t(`csgo_event_desc`).replace("%s1", $t(`csgo_tournament_event_name_${item.tournament_event_id}`))}</span><br/><br/> `
         : "";
 
-    let msg = $t("CSGO_Tool_Sticker_Desc");
-    let desc = $t(item.description_string);
+    const msg = $t("CSGO_Tool_Sticker_Desc");
+    const desc = $t(item.description_string);
     if (desc && desc.length > 0 && item.description_string !== `#${desc}`) {
         return `${commemoratesText}${msg}<br><br>${desc}`;
     }
     return `${commemoratesText}${msg}`;
-};
+}
 
-const getType = item => {
+function getType(item) {
     if (item.tournament_player_id) {
         return "Autograph";
     }
@@ -72,9 +72,9 @@ const getType = item => {
     }
 
     return "Other";
-};
+}
 
-const getEffect = item => {
+function getEffect(item) {
     if ($t(item.item_name, true).includes("(Holo)") || $t(item.item_name, true).includes("(Holo, ")) {
         return "Holo";
     }
@@ -103,9 +103,9 @@ const getEffect = item => {
     }
 
     return "Other";
-};
+}
 
-const getMarketHashName = item => {
+function getMarketHashName(item) {
     // 1 - DreamHack 2013
     if (item.tournament_event_id === 1) {
         return null;
@@ -154,9 +154,9 @@ const getMarketHashName = item => {
     }
 
     return `${$t("csgo_tool_sticker", true)} | ${$t(item.item_name, true)}`;
-};
+}
 
-const parseItem = item => {
+function parseItem(item) {
     const { cratesBySkins, proTeams, proPlayers, collectionsByStickers, cdnImages } = state;
 
     const image =
@@ -219,13 +219,13 @@ const parseItem = item => {
             image_inventory: `econ/stickers/${item.sticker_material.toLowerCase()}`,
         },
     };
-};
+}
 
-export const getStickers = () => {
+export function getStickers() {
     const { stickerKits } = state;
     const { folder } = languageData;
 
     const stickers = stickerKits.filter(isSticker).map(parseItem);
 
     saveDataJson(`./public/api/${folder}/stickers.json`, stickers);
-};
+}

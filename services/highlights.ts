@@ -1,8 +1,8 @@
 import { saveDataJson } from "../utils/saveDataJson.js";
-import { $t, languageData } from "./translations.js";
 import { state } from "./main.js";
+import { $t, languageData } from "./translations.js";
 
-const parseItem = item => {
+function parseItem(item) {
     const { cdnImages } = state;
     const { folder } = languageData;
     const [tournament, highlightType] = item.id.split("_");
@@ -44,13 +44,13 @@ const parseItem = item => {
             image_inventory: item.image_inventory,
         },
     };
-};
+}
 
-export const getHighlights = () => {
+export function getHighlights() {
     const { highlightReels } = state;
     const { folder } = languageData;
 
     const highlights = highlightReels.map(parseItem);
 
     saveDataJson(`./public/api/${folder}/highlights.json`, highlights);
-};
+}

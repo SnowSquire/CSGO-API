@@ -1,10 +1,10 @@
-import { saveDataJson } from "../utils/saveDataJson.js";
-import { $t, languageData } from "./translations.js";
 import { getImageUrl } from "../constants.js";
 import { weaponIDMapping } from "../utils/index.js";
+import { saveDataJson } from "../utils/saveDataJson.js";
 import { state } from "./main.js";
+import { $t, languageData } from "./translations.js";
 
-export const getBaseWeapons = () => {
+export function getBaseWeapons() {
     const { cdnImages } = state;
     const { folder } = languageData;
 
@@ -615,4 +615,4 @@ export const getBaseWeapons = () => {
     ].sort((a, b) => a.def_index - b.def_index);
 
     saveDataJson(`./public/api/${folder}/base_weapons.json`, baseWeapons);
-};
+}

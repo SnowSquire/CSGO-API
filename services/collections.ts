@@ -1,12 +1,12 @@
-import { saveDataJson } from "../utils/saveDataJson.js";
-import { $t, languageData } from "./translations.js";
-import { state } from "./main.js";
-import { getRarityColor } from "../utils/index.js";
 import { getImageUrl } from "../constants.js";
+import { getRarityColor } from "../utils/index.js";
+import { saveDataJson } from "../utils/saveDataJson.js";
+import { state } from "./main.js";
+import { $t, languageData } from "./translations.js";
 
 const isCollection = item => item.is_collection !== undefined;
 
-const isSelfOpeningCollection = item => {
+function isSelfOpeningCollection(item) {
     if (item.item_name === undefined) return false;
 
     if (!item.item_name.startsWith("#CSGO_crate")) {
@@ -27,7 +27,6 @@ const isSelfOpeningCollection = item => {
     //         return true;
     //     }
     // }
-
     if (item.item_type === "self_opening_purchase") {
         if (item.prefab.includes("graffiti")) {
             return true;
@@ -35,9 +34,9 @@ const isSelfOpeningCollection = item => {
     }
 
     return false;
-};
+}
 
-const parseItem = item => {
+function parseItem(item) {
     const { skinsByCollections, cratesByCollections, cdnImages } = state;
 
     const fileName = `${item.name.replace("#CSGO_", "")}`;
@@ -67,9 +66,9 @@ const parseItem = item => {
             image_inventory: `econ/set_icons/${fileName}`,
         },
     };
-};
+}
 
-const parseItemSelfOpening = item => {
+function parseItemSelfOpening(item) {
     const { skinsByCollections, cdnImages } = state;
 
     const image =
@@ -97,9 +96,9 @@ const parseItemSelfOpening = item => {
             image_inventory: item.image_inventory.toLowerCase(),
         },
     };
-};
+}
 
-export const getCollections = async () => {
+export async function getCollections() {
     const { items, itemSets } = state;
     const { folder } = languageData;
 
@@ -109,4 +108,4 @@ export const getCollections = async () => {
     ].filter(collection => collection.name);
 
     await saveDataJson(`./public/api/${folder}/collections.json`, collections);
-};
+}

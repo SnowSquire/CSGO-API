@@ -1,5 +1,5 @@
 import { describe, test } from "bun:test";
-import { configure, type } from "arktype";
+import { type } from "arktype";
 import items_game from "./items_game.json";
 import { ItemsGame } from "./types";
 

@@ -1,9 +1,9 @@
-import { saveDataJson } from "../utils/saveDataJson.js";
-import { $t, languageData } from "./translations.js";
-import { state } from "./main.js";
 import { getImageUrl } from "../constants.js";
+import { saveDataJson } from "../utils/saveDataJson.js";
+import { state } from "./main.js";
+import { $t, languageData } from "./translations.js";
 
-const isKey = item => {
+function isKey(item) {
     if (item.item_name === undefined) {
         return false;
     }
@@ -19,19 +19,17 @@ const isKey = item => {
     // if (!item.item_name.startsWith("#CSGO_crate")) {
     //     return false;
     // }
-
     // if (item.item_name.includes("contestwinner")) {
     //     return false;
     // }
-
     if (!item?.prefab?.includes("weapon_case_key")) {
         return false;
     }
 
     return true;
-};
+}
 
-const parseItem = item => {
+function parseItem(item) {
     const { items, cdnImages } = state;
 
     const marketable = [
@@ -108,9 +106,9 @@ const parseItem = item => {
             image_inventory: item.image_inventory.toLowerCase(),
         },
     };
-};
+}
 
-export const getKeys = () => {
+export function getKeys() {
     const { items } = state;
     const { folder } = languageData;
 
@@ -140,4 +138,4 @@ export const getKeys = () => {
         });
 
     saveDataJson(`./public/api/${folder}/keys.json`, keys);
-};
+}

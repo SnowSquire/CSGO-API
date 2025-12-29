@@ -1,24 +1,24 @@
+import { getImageUrl } from "../constants.js";
 import {
-    getWeaponName,
-    isNotWeapon,
-    knives,
     getCategory,
-    getWears,
     getDopplerPhase,
     getRarityColor,
+    getWeaponName,
+    getWears,
+    isNotWeapon,
+    knives,
     weaponIDMapping,
 } from "../utils/index.js";
 import { saveDataJson } from "../utils/saveDataJson.js";
-import { $t, $tTag, $tc, languageData } from "./translations.js";
-import { state } from "./main.js";
 import specialNotes from "../utils/specialNotes.json" with { type: "json" };
-import { getImageUrl } from "../constants.js";
+import { state } from "./main.js";
+import { $t, $tc, $tTag, languageData } from "./translations.js";
 
-const getPatternName = (weapon, string) => {
+function getPatternName(weapon, string) {
     return string.replace(`${weapon}_`, "").toLowerCase();
-};
+}
 
-const isSkin = iconPath => {
+function isSkin(iconPath) {
     if (iconPath.includes("newcs2")) {
         return false;
     }
@@ -26,9 +26,9 @@ const isSkin = iconPath => {
     const regexSkinId = /econ\/default_generated\/(.*?)_light$/i;
 
     return regexSkinId.test(iconPath.toLowerCase());
-};
+}
 
-const getSkinInfo = iconPath => {
+function getSkinInfo(iconPath) {
     const regexSkinId = /econ\/default_generated\/(.*?)_light$/i;
     const path = iconPath.toLowerCase();
     const skinId = path.match(regexSkinId);
@@ -37,9 +37,9 @@ const getSkinInfo = iconPath => {
     const pattern = getPatternName(weapon, skinId[1]);
 
     return [weapon, pattern];
-};
+}
 
-const getDescription = (desc, paintKits, pattern) => {
+function getDescription(desc, paintKits, pattern) {
     const pattern_desc = $t(`#PaintKit_${pattern}`);
     if (pattern_desc && pattern_desc.length > 0) {
         return `${desc} ${pattern_desc}`;
@@ -57,9 +57,9 @@ const getDescription = (desc, paintKits, pattern) => {
     }
 
     return desc;
-};
+}
 
-const parseItem = (item, items) => {
+function parseItem(item, items) {
     const { rarities, paintKits, cratesBySkins, souvenirSkins, collectionsBySkins, cdnImages } = state;
     const [weapon, pattern] = getSkinInfo(item.icon_path);
     const dopplerPhase = getDopplerPhase(paintKits[pattern]?.paint_index);
@@ -163,9 +163,9 @@ const parseItem = (item, items) => {
             name: items[weapon].name,
         },
     };
-};
+}
 
-export const getSkins = async () => {
+export async function getSkins() {
     const { itemsGame, items, cratesBySkins, cdnImages } = state;
     const { folder } = languageData;
 
@@ -220,4 +220,4 @@ export const getSkins = async () => {
     ].filter(skin => !skin.name.includes("null") && skin.rarity.id);
 
     await saveDataJson(`./public/api/${folder}/skins.json`, skins);
-};
+}

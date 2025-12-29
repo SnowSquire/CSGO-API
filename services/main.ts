@@ -14,7 +14,19 @@ import {
 } from "../utils/index";
 import { rareSpecial } from "../utils/rareSpecial";
 
-export const state: { itemsGame: ItemsGame | null } = { itemsGame: null };
+export const state: {
+    itemsGame: ItemsGame | null;
+    itemSets: Array<ItemsGame["item_sets"][string]> | null;
+    stickerKits: Array<ItemsGame["sticker_kits"][string] & { object_id: string }> | null;
+    stickerKitsObj: Record<string, ItemsGame["sticker_kits"][string]> | null;
+    players: Record<string, ItemsGame["pro_players"][string]["name"]> | null;
+} = {
+    itemsGame: null,
+    itemSets: null,
+    stickerKits: null,
+    stickerKitsObj: null,
+    players: null,
+};
 
 export async function loadItemsGame() {
     await fetch(ITEMS_GAME_URL)
@@ -96,11 +108,11 @@ export async function loadItemsGame() {
 }
 
 export function loadItemSets() {
-    state.itemSets = Object.values(state.itemsGame.item_sets);
+    state.itemSets = Object.values(state.itemsGame!.item_sets);
 }
 
 export default function loadStickerKits() {
-    state.stickerKits = Object.entries(state.itemsGame.sticker_kits).map(([key, item]) => {
+    state.stickerKits = Object.entries(state.itemsGame!.sticker_kits).map(([key, item]) => {
         if (item.name === "comm01_howling_dawn") {
             item.item_rarity = "contraband";
         }
@@ -114,7 +126,7 @@ export default function loadStickerKits() {
     state.stickerKitsObj = Object.fromEntries(state.stickerKits.map(item => [item.name, item]));
 
     // Load also players
-    state.players = Object.entries(state.itemsGame.pro_players).reduce((acc, [id, player]) => {
+    state.players = Object.entries(state.itemsGame!.pro_players).reduce((acc, [id, player]) => {
         acc[id] = player.name.toString();
         return acc;
     }, {});

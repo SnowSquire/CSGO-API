@@ -1,10 +1,10 @@
-import { saveDataJson } from "../utils/saveDataJson.js";
-import { $t, $tc, languageData } from "./translations.js";
-import { state } from "./main.js";
-import { getCollectibleRarity, getRarityColor } from "../utils/index.js";
 import { getImageUrl } from "../constants.js";
+import { getCollectibleRarity, getRarityColor } from "../utils/index.js";
+import { saveDataJson } from "../utils/saveDataJson.js";
+import { state } from "./main.js";
+import { $t, $tc, languageData } from "./translations.js";
 
-const isCollectible = item => {
+function isCollectible(item) {
     if (item.item_name === undefined) return false;
 
     if (item.item_name.startsWith("#CSGO_Collectible")) {
@@ -20,9 +20,9 @@ const isCollectible = item => {
     }
 
     return false;
-};
+}
 
-const getType = collectible => {
+function getType(collectible) {
     if (collectible.image_inventory.includes("service_medal")) {
         return "Service Medal";
     }
@@ -79,9 +79,9 @@ const getType = collectible => {
     }
 
     return null;
-};
+}
 
-const getMarketHashName = item => {
+function getMarketHashName(item) {
     const isAttendance = item.prefab === "attendance_pin";
     const isCannotTrade = item.attributes?.["cannot trade"];
 
@@ -97,9 +97,9 @@ const getMarketHashName = item => {
     }
 
     return null;
-};
+}
 
-const parseItem = item => {
+function parseItem(item) {
     const { cdnImages } = state;
     const isAttendance = item.prefab === "attendance_pin";
     const image = cdnImages[item.image_inventory] ?? getImageUrl(item.image_inventory);
@@ -137,9 +137,9 @@ const parseItem = item => {
             image_inventory: item.image_inventory,
         },
     };
-};
+}
 
-export const getCollectibles = async () => {
+export async function getCollectibles() {
     const { items } = state;
     const { folder } = languageData;
 
@@ -149,4 +149,4 @@ export const getCollectibles = async () => {
         .filter(collectible => collectible.name);
 
     await saveDataJson(`./public/api/${folder}/collectibles.json`, collectibles);
-};
+}

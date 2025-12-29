@@ -6,7 +6,7 @@ import { $t, languageData } from "./translations.js";
 
 const isAgent = (item: { prefab: string }) => item.prefab === "customplayertradable";
 
-const parseItem = (item: {
+function parseItem(item: {
     name: string;
     object_id: any;
     item_name: any;
@@ -14,7 +14,7 @@ const parseItem = (item: {
     item_rarity: any;
     used_by_classes: {};
     model_player: any;
-}) => {
+}) {
     const { collectionsBySkins, cdnImages } = state;
 
     const image =
@@ -52,13 +52,13 @@ const parseItem = (item: {
             image_inventory: `econ/characters/${item.name.toLocaleLowerCase()}`,
         },
     };
-};
+}
 
-export const getAgents = async () => {
+export async function getAgents() {
     const { items } = state;
     const { folder } = languageData;
 
     const agents = Object.values(items).filter(isAgent).map(parseItem);
 
     await saveDataJson(`./public/api/${folder}/agents.json`, agents);
-};
+}

@@ -245,7 +245,7 @@ export const knives = [
     },
 ];
 
-export const getWeaponName = string => {
+export function getWeaponName(string) {
     for (const weapon of weaponsNames) {
         if (string.includes(weapon)) {
             return weapon;
@@ -253,15 +253,15 @@ export const getWeaponName = string => {
     }
 
     return false;
-};
+}
 
-export const isNotWeapon = string => {
+export function isNotWeapon(string) {
     return (
         !string.includes("weapon_") || string.includes("weapon_knife") || string.includes("weapon_bayonet")
     );
-};
+}
 
-export const getCategory = weapon => {
+export function getCategory(weapon) {
     switch (weapon) {
         case "weapon_deagle":
         case "weapon_elite":
@@ -336,9 +336,9 @@ export const getCategory = weapon => {
     }
 
     return null;
-};
+}
 
-export const getWears = (minFloat, maxFloat) => {
+export function getWears(minFloat, maxFloat) {
     const wears = [
         { wear: "SFUI_InvTooltip_Wear_Amount_0", min: 0.0, max: 0.07 },
         { wear: "SFUI_InvTooltip_Wear_Amount_1", min: 0.07, max: 0.15 },
@@ -348,9 +348,9 @@ export const getWears = (minFloat, maxFloat) => {
     ];
 
     return wears.filter(range => range.max > minFloat && range.min < maxFloat).map(range => range.wear);
-};
+}
 
-export const getDopplerPhase = paintIndex => {
+export function getDopplerPhase(paintIndex) {
     const dopplerPhases = {
         // Doppler
         415: "Ruby",
@@ -388,21 +388,13 @@ export const getDopplerPhase = paintIndex => {
     };
 
     return dopplerPhases?.[paintIndex];
-};
+}
 
-export const isExclusive = name => {
+export function isExclusive(name) {
     return ["halo_01", "hlalyx_01", "hades_01"].includes(name);
-};
+}
 
-export const skinMarketHashName = ({
-    itemName,
-    pattern,
-    wear,
-    isStatTrak,
-    isSouvenir,
-    isWeapon,
-    isVanilla,
-}) => {
+export function skinMarketHashName({ itemName, pattern, wear, isStatTrak, isSouvenir, isWeapon, isVanilla }) {
     if (isWeapon) {
         if (isStatTrak) {
             return `StatTrak™ ${itemName} | ${pattern} (${wear})`;
@@ -428,9 +420,9 @@ export const skinMarketHashName = ({
             return `★ ${itemName} | ${pattern} (${wear})`;
         }
     }
-};
+}
 
-export const getCollectibleRarity = prefab => {
+export function getCollectibleRarity(prefab) {
     const keys = prefab.split(" ");
 
     for (const key of keys) {
@@ -468,9 +460,9 @@ export const getCollectibleRarity = prefab => {
     }
 
     return null;
-};
+}
 
-export const getRarityColor = id => {
+export function getRarityColor(id: string) {
     id = id?.toLowerCase() ?? "";
 
     switch (id) {
@@ -503,9 +495,9 @@ export const getRarityColor = id => {
         default:
             return null;
     }
-};
+}
 
-export const filterUniqueByAttribute = (items, attribute) => {
+export function filterUniqueByAttribute(items, attribute) {
     const uniqueValues = new Set();
     return items.filter(item => {
         if (!uniqueValues.has(item[attribute])) {
@@ -514,9 +506,9 @@ export const filterUniqueByAttribute = (items, attribute) => {
         }
         return false;
     });
-};
+}
 
-export const formatIconPath = (icon_path, wear) => {
+export function formatIconPath(icon_path, wear) {
     // SFUI_InvTooltip_Wear_Amount_0 - Factory New - light
     // SFUI_InvTooltip_Wear_Amount_1 - Minimal Wear - light
     // SFUI_InvTooltip_Wear_Amount_2 - Field-Tested - medium
@@ -532,9 +524,9 @@ export const formatIconPath = (icon_path, wear) => {
 
     // Return the image as it is with _light_
     return icon_path;
-};
+}
 
-export const getGraffitiVariations = material => {
+export function getGraffitiVariations(material) {
     return (
         {
             spray_std_axes_crossed: [0],
@@ -638,7 +630,7 @@ export const getGraffitiVariations = material => {
             spray_std3_xm1014: [0],
         }[material] ?? []
     );
-};
+}
 
 export function getFinishStyleLink(id) {
     switch (id) {

@@ -1,18 +1,18 @@
-import { saveDataJson } from "../utils/saveDataJson.js";
-import { $t, languageData } from "./translations.js";
-import { state } from "./main.js";
-import { getRarityColor, isExclusive } from "../utils/index.js";
 import { getImageUrl } from "../constants.js";
+import { getRarityColor, isExclusive } from "../utils/index.js";
+import { saveDataJson } from "../utils/saveDataJson.js";
+import { state } from "./main.js";
+import { $t, languageData } from "./translations.js";
 
-const getDescription = (item, isStattrak) => {
+function getDescription(item, isStattrak) {
     const stattrakText = isStattrak
         ? `<span style='color:#99ccff;'>${$t("attrib_killeater")}</span><br/><br/><span style='color:#cf6a32;'>${$t("killeaterdescriptionnotice_ocmvps")}</span><br/><br/>`
         : "";
 
     return `${stattrakText}${$t("csgo_musickit_desc")}<br/><br/>${$t(item.loc_description)}`;
-};
+}
 
-const parseItem = item => {
+function parseItem(item) {
     const { cdnImages } = state;
     const image =
         cdnImages[item.image_inventory.toLowerCase()] ?? getImageUrl(item.image_inventory.toLowerCase());
@@ -37,7 +37,7 @@ const parseItem = item => {
         "skog_03",
     ];
 
-    let kits = [];
+    const kits = [];
 
     if (!kitsOnlyStattrak.includes(item.name)) {
         const normalMusicKit = {
@@ -90,13 +90,13 @@ const parseItem = item => {
     }
 
     return kits;
-};
+}
 
-export const getMusicKits = () => {
+export function getMusicKits() {
     const { musicDefinitions } = state;
     const { folder } = languageData;
 
     const musicKits = musicDefinitions.map(parseItem).reduce((acc, kits) => acc.concat(kits), []);
 
     saveDataJson(`./public/api/${folder}/music_kits.json`, musicKits);
-};
+}

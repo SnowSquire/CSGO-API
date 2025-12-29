@@ -1,11 +1,11 @@
-import { saveDataJson } from "../utils/saveDataJson.js";
-import { $t, $tc, languageData } from "./translations.js";
-import { state } from "./main.js";
-import specialNotes from "../utils/specialNotes.json" with { type: "json" };
-import { getRarityColor } from "../utils/index.js";
 import { getImageUrl } from "../constants.js";
+import { getRarityColor } from "../utils/index.js";
+import { saveDataJson } from "../utils/saveDataJson.js";
+import specialNotes from "../utils/specialNotes.json" with { type: "json" };
+import { state } from "./main.js";
+import { $t, $tc, languageData } from "./translations.js";
 
-const isCrate = item => {
+function isCrate(item) {
     if (item.item_name === undefined) return false;
 
     if (item?.attributes?.["set supply crate series"]?.attribute_class === "supply_crate_series") {
@@ -36,11 +36,10 @@ const isCrate = item => {
     // if (item.translation_name.includes("Collection")) {
     //     return false;
     // }
-
     return true;
-};
+}
 
-const getCrateType = item => {
+function getCrateType(item) {
     if (item.prefab === "weapon_case") {
         return "Case";
     }
@@ -68,7 +67,6 @@ const getCrateType = item => {
     // if (item.translation_description?.includes("capsule")) {
     //     return "Sticker Capsule";
     // }
-
     if (item.name.startsWith("crate_signature")) {
         return "Autograph Capsule";
     }
@@ -86,9 +84,9 @@ const getCrateType = item => {
     }
 
     return null;
-};
+}
 
-const getFirstSaleDate = (item, prefabs) => {
+function getFirstSaleDate(item, prefabs) {
     if (item.first_sale_date !== undefined) {
         return item.first_sale_date;
     }
@@ -104,17 +102,17 @@ const getFirstSaleDate = (item, prefabs) => {
     }
 
     return null;
-};
+}
 
-const getMarketHashName = item => {
+function getMarketHashName(item) {
     if (["4600", "4614", "4719", "4729", "4779", "4871", "4872", "4783", "4795"].includes(item.object_id)) {
         return null;
     }
 
     return $t(item.item_name, true).replace("Holo/Foil", "Holo-Foil");
-};
+}
 
-const parseItem = (item, prefabs) => {
+function parseItem(item, prefabs) {
     const { skinsByCrates, revolvingLootLists, cdnImages } = state;
 
     const image =
@@ -123,7 +121,7 @@ const parseItem = (item, prefabs) => {
     const attributeValue = item.attributes?.["set supply crate series"]?.value ?? null;
     const keyLootList = lootListName ?? revolvingLootLists[attributeValue] ?? null;
 
-    let crate = {
+    const crate = {
         id: `crate-${item.object_id}`,
         name: $t(item.item_name),
         description: $t(item.item_description) ?? $t(item.item_description_prefab),
@@ -201,17 +199,16 @@ const parseItem = (item, prefabs) => {
     }
 
     return crate;
-};
+}
 
-export const getCrates = async () => {
+export async function getCrates() {
     const { items, prefabs } = state;
     const { folder } = languageData;
 
     const crates = Object.values(items)
         .filter(isCrate)
-        .map(item => parseItem(item, prefabs))
-        .flat()
+        .flatMap(item => parseItem(item, prefabs))
         .filter(crate => crate.name);
 
     await saveDataJson(`./public/api/${folder}/crates.json`, crates);
-};
+}

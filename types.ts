@@ -3,7 +3,7 @@ import { configure } from "arktype/config";
 configure({ onUndeclaredKey: "reject" });
 
 import { regex, type } from "arktype";
-import { number } from "arktype/internal/keywords/number.ts";
+
 export type ItemStringThingy = typeof ItemStringThingy.infer;
 const ItemStringThingy = regex("^[.*].*$");
 const hexColor = regex("^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})$");
@@ -92,6 +92,36 @@ const ItemSetDefinition = type({
         unique: "string",
     },
 });
+const StageDefinition = type({
+    clutch_kills: "number.integer",
+    pistol_kills: "number.integer",
+    opening_kills: "number.integer",
+    sniper_kills: "number.integer",
+    KDR: "number",
+    enemy_kills: "number.integer",
+    deaths: "number.integer",
+    matches_played: "number.integer",
+});
+const EventDefinition = type({
+    team: "number.integer",
+    "clutch_kills?": "number.integer",
+    "pistol_kills?": "number.integer",
+    "opening_kills?": "number.integer",
+    "sniper_kills?": "number.integer",
+    "KDR?": "number",
+    "enemy_kills?": "number.integer",
+    "deaths?": "number.integer",
+    "matches_played?": "number.integer",
+    "stage0?": StageDefinition,
+    "stage1?": StageDefinition,
+});
+const ProPlayerDefinition = type({
+    name: type("string | number").pipe(val => val.toString()),
+    code: type("string | number").pipe(val => val.toString()),
+    dob: "string",
+    geo: "string",
+    events: type.Record("string.integer", EventDefinition),
+});
 
 export const ItemsGame = type({
     game_info: {
@@ -133,7 +163,7 @@ export const ItemsGame = type({
     recipes: "unknown",
     seasonaloperations: "unknown",
     pro_event_results: "unknown",
-    pro_players: "unknown",
+    pro_players: type.Record("string.integer", ProPlayerDefinition),
     pro_teams: "unknown",
     items_game_live: "unknown",
     keychain_definitions: "unknown",

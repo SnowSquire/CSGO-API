@@ -1,10 +1,10 @@
-import { saveDataJson } from "../utils/saveDataJson.js";
-import { $t, languageData } from "./translations.js";
-import { state } from "./main.js";
 import { getImageUrl } from "../constants.js";
 import { getRarityColor } from "../utils/index.js";
+import { saveDataJson } from "../utils/saveDataJson.js";
+import { state } from "./main.js";
+import { $t, languageData } from "./translations.js";
 
-const isKeychain = item => {
+function isKeychain(item) {
     if (!item.loc_name.startsWith("#keychain_")) {
         return false;
     }
@@ -14,13 +14,13 @@ const isKeychain = item => {
     }
 
     return true;
-};
+}
 
-const getMarketHashName = item => {
+function getMarketHashName(item) {
     return `${$t("CSGO_Tool_Keychain", true)} | ${$t(item.loc_name, true)}`;
-};
+}
 
-const parseItem = item => {
+function parseItem(item) {
     const { collectionsBySkins, cdnImages } = state;
     const image =
         cdnImages[item.image_inventory.toLowerCase()] ?? getImageUrl(item.image_inventory.toLowerCase());
@@ -49,13 +49,13 @@ const parseItem = item => {
             image_inventory: item.image_inventory.toLowerCase(),
         },
     };
-};
+}
 
-export const getKeychains = () => {
+export function getKeychains() {
     const { keychainDefinitions } = state;
     const { folder } = languageData;
 
     const keychains = keychainDefinitions.filter(isKeychain).map(parseItem);
 
     saveDataJson(`./public/api/${folder}/keychains.json`, keychains);
-};
+}

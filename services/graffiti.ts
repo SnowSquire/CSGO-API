@@ -1,11 +1,11 @@
-import { saveDataJson } from "../utils/saveDataJson.js";
-import { $t, languageData } from "./translations.js";
-import { state } from "./main.js";
-import specialNotes from "../utils/specialNotes.json" with { type: "json" };
-import { getGraffitiVariations, getRarityColor } from "../utils/index.js";
 import { getImageUrl } from "../constants.js";
+import { getGraffitiVariations, getRarityColor } from "../utils/index.js";
+import { saveDataJson } from "../utils/saveDataJson.js";
+import specialNotes from "../utils/specialNotes.json" with { type: "json" };
+import { state } from "./main.js";
+import { $t, languageData } from "./translations.js";
 
-const isGraffiti = item => {
+function isGraffiti(item) {
     if (item.item_name.startsWith("#SprayKit_")) {
         return true;
     }
@@ -19,18 +19,18 @@ const isGraffiti = item => {
     }
 
     return false;
-};
+}
 
-const getDescription = item => {
+function getDescription(item) {
     let msg = $t("csgo_tool_spray_desc");
-    let desc = $t(item.description_string);
+    const desc = $t(item.description_string);
     if (desc && desc.length > 0) {
         msg = `${msg}<br><br>${desc}`;
     }
     return msg;
-};
+}
 
-const getMarketHashName = (item, colorKey) => {
+function getMarketHashName(item, colorKey) {
     if (colorKey) {
         return `${$t("csgo_tool_spray", true)} | ${$t(item.item_name, true)} (${$t(colorKey, true)})`;
     }
@@ -40,9 +40,9 @@ const getMarketHashName = (item, colorKey) => {
         return null;
     }
     return `${$t("csgo_tool_spray", true)} | ${$t(item.item_name, true)}`;
-};
+}
 
-const parseItemSealedGraffiti = item => {
+function parseItemSealedGraffiti(item) {
     const { cratesBySkins, cdnImages } = state;
     const image =
         cdnImages[`econ/stickers/${item.sticker_material}`] ??
@@ -112,9 +112,9 @@ const parseItemSealedGraffiti = item => {
             image_inventory: `econ/stickers/${item.sticker_material}`,
         },
     };
-};
+}
 
-export const getGraffiti = () => {
+export function getGraffiti() {
     const { stickerKits } = state;
     const { folder } = languageData;
 
@@ -124,4 +124,4 @@ export const getGraffiti = () => {
         .flatMap(level1 => level1);
 
     saveDataJson(`./public/api/${folder}/graffiti.json`, graffiti);
-};
+}

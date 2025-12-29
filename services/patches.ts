@@ -1,27 +1,27 @@
-import { saveDataJson } from "../utils/saveDataJson.js";
-import { $t, languageData } from "./translations.js";
-import { state } from "./main.js";
-import { getRarityColor } from "../utils/index.js";
 import { getImageUrl } from "../constants.js";
+import { getRarityColor } from "../utils/index.js";
+import { saveDataJson } from "../utils/saveDataJson.js";
+import { state } from "./main.js";
+import { $t, languageData } from "./translations.js";
 
-const isPatch = item => {
+function isPatch(item) {
     if (["case_skillgroups/patch_legendaryeagle"].includes(item.patch_material)) {
         return false;
     }
 
     return !(item.patch_material === undefined);
-};
+}
 
-const getDescription = item => {
+function getDescription(item) {
     let msg = $t("CSGO_Tool_Patch_Desc");
-    let desc = $t(item.description_string);
+    const desc = $t(item.description_string);
     if (desc && desc.length > 0) {
         msg = `${msg}<br><br>${desc}`;
     }
     return msg;
-};
+}
 
-const parseItem = item => {
+function parseItem(item) {
     const { cdnImages } = state;
     const image =
         cdnImages[`econ/patches/${item.patch_material}`] ??
@@ -46,13 +46,13 @@ const parseItem = item => {
             image_inventory: `econ/patches/${item.patch_material}`,
         },
     };
-};
+}
 
-export const getPatches = () => {
+export function getPatches() {
     const { stickerKits } = state;
     const { folder } = languageData;
 
     const patches = stickerKits.filter(isPatch).map(parseItem);
 
     saveDataJson(`./public/api/${folder}/patches.json`, patches);
-};
+}

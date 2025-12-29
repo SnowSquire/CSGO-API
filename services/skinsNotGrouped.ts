@@ -1,27 +1,27 @@
+import { getImageUrl } from "../constants.js";
 import {
+    formatIconPath,
+    getCategory,
+    getDopplerPhase,
+    getFinishStyleLink,
+    getRarityColor,
     getWeaponName,
+    getWears,
     isNotWeapon,
     knives,
-    getWears,
-    getDopplerPhase,
     skinMarketHashName,
-    getCategory,
-    getRarityColor,
-    formatIconPath,
-    getFinishStyleLink,
     weaponIDMapping,
 } from "../utils/index.js";
 import { saveDataJson } from "../utils/saveDataJson.js";
 import specialNotes from "../utils/specialNotes.json" with { type: "json" };
-import { $t, $tc, $tTag, languageData } from "./translations.js";
 import { state } from "./main.js";
-import { getImageUrl } from "../constants.js";
+import { $t, $tc, $tTag, languageData } from "./translations.js";
 
-const getPatternName = (weapon, string) => {
+function getPatternName(weapon, string) {
     return string.replace(`${weapon}_`, "").toLowerCase();
-};
+}
 
-const isSkin = iconPath => {
+function isSkin(iconPath) {
     if (iconPath.includes("newcs2")) {
         return false;
     }
@@ -29,9 +29,9 @@ const isSkin = iconPath => {
     const regexSkinId = /econ\/default_generated\/(.*?)_light$/i;
 
     return regexSkinId.test(iconPath.toLowerCase());
-};
+}
 
-const getSkinInfo = iconPath => {
+function getSkinInfo(iconPath) {
     const regexSkinId = /econ\/default_generated\/(.*?)_light$/i;
     const path = iconPath.toLowerCase();
     const skinId = path.match(regexSkinId);
@@ -40,9 +40,9 @@ const getSkinInfo = iconPath => {
     const pattern = getPatternName(weapon, skinId[1]);
 
     return [weapon, pattern];
-};
+}
 
-const getDescription = (desc, paintKits, pattern, isStatTrak) => {
+function getDescription(desc, paintKits, pattern, isStatTrak) {
     const stattrakText = isStatTrak
         ? `<span style='color:#99ccff;'>${$t("attrib_killeater")}</span><br/><br/><span style='color:#cf6a32;'>${$t("killeaterdescriptionnotice_kills")}</span><br/><br/> `
         : "";
@@ -64,17 +64,17 @@ const getDescription = (desc, paintKits, pattern, isStatTrak) => {
     }
 
     return desc;
-};
+}
 
-const getVanillaDescription = (desc, isStatTrak) => {
+function getVanillaDescription(desc, isStatTrak) {
     const stattrakText = isStatTrak
         ? `<span style='color:#99ccff;'>${$t("attrib_killeater")}</span><br/><br/><span style='color:#cf6a32;'>${$t("killeaterdescriptionnotice_kills")}</span><br/><br/> `
         : "";
 
     return `${stattrakText}${desc}`;
-};
+}
 
-const parseItem = (item, items) => {
+function parseItem(item, items) {
     const { rarities, paintKits, souvenirSkins, stattTrakSkins, cdnImages } = state;
     const [weapon, pattern] = getSkinInfo(item.icon_path);
     const translatedName = !isNotWeapon(weapon)
@@ -124,9 +124,7 @@ const parseItem = (item, items) => {
 
     return types.map(type =>
         wears.map((wear, index) => ({
-            id: `skin-${item.object_id}_${index}${
-                type === "skin_stattrak" ? "_st" : type === "skin_souvenir" ? "_so" : ""
-            }`,
+            id: `skin-${item.object_id}_${index}${type === "skin_stattrak" ? "_st" : type === "skin_souvenir" ? "_so" : ""}`,
             skin_id: `skin-${item.object_id}`,
             name: isNotWeapon(weapon)
                 ? $tc(
@@ -222,9 +220,9 @@ const parseItem = (item, items) => {
             },
         }))
     );
-};
+}
 
-export const getSkinsNotGrouped = () => {
+export function getSkinsNotGrouped() {
     const { itemsGame, items, cdnImages } = state;
     const { folder } = languageData;
 
@@ -234,67 +232,65 @@ export const getSkinsNotGrouped = () => {
         ...Object.entries(itemsGame.alternate_icons2.weapon_icons)
             .filter(([, item]) => isSkin(item.icon_path))
             .map(([key, item]) => parseItem({ ...item, object_id: key }, items))
-            .flatMap(level1 => level1.flatMap(level2 => level2)),
-        ...types
-            .map(type =>
-                knives.map(knife => ({
-                    id: `skin-vanilla-${knife.name}${type === "rare_special_vanilla_stattrak" ? "_st" : ""}`,
-                    skin_id: `skin-vanilla-${knife.name}`,
-                    name: $tc(type, {
-                        item_name: $t(knife.item_name),
-                    }),
-                    description: getVanillaDescription(
-                        $t(knife.item_description),
-                        type === "rare_special_vanilla_stattrak"
-                    ),
-                    weapon: {
-                        id: knife.item_name,
-                        weapon_id: weaponIDMapping[knife.name],
-                        name: $t(knife.item_name),
-                    },
-                    category: {
-                        id: "sfui_invpanel_filter_melee",
-                        name: $t("sfui_invpanel_filter_melee"),
-                    },
-                    rarity: {
-                        id: `rarity_ancient_weapon`,
-                        name: $t(`rarity_ancient_weapon`),
-                        color: getRarityColor(`rarity_ancient_weapon`),
-                    },
-                    stattrak: type === "rare_special_vanilla_stattrak",
-                    paint_index: null,
-                    market_hash_name: skinMarketHashName({
-                        itemName: $t(knife.item_name, true),
-                        pattern: null,
-                        wear: null,
-                        isStatTrak: type === "rare_special_vanilla_stattrak",
-                        isSouvenir: false,
-                        isWeapon: false,
-                        isVanilla: true,
-                    }),
-                    team: {
-                        id: "both",
-                        name: $t("inv_filter_both_teams"),
-                    },
-                    style: {
-                        id: 0,
-                        name: $t(`SFUI_ItemInfo_FinishStyle_0`),
-                        url: getFinishStyleLink(0),
-                    },
-                    legacy_model: true,
-                    image:
-                        cdnImages[`econ/weapons/base_weapons/${knife.name}`] ??
-                        getImageUrl(`econ/weapons/base_weapons/${knife.name}`),
+            .flatMap(level1 => level1.flat()),
+        ...types.flatMap(type =>
+            knives.map(knife => ({
+                id: `skin-vanilla-${knife.name}${type === "rare_special_vanilla_stattrak" ? "_st" : ""}`,
+                skin_id: `skin-vanilla-${knife.name}`,
+                name: $tc(type, {
+                    item_name: $t(knife.item_name),
+                }),
+                description: getVanillaDescription(
+                    $t(knife.item_description),
+                    type === "rare_special_vanilla_stattrak"
+                ),
+                weapon: {
+                    id: knife.item_name,
+                    weapon_id: weaponIDMapping[knife.name],
+                    name: $t(knife.item_name),
+                },
+                category: {
+                    id: "sfui_invpanel_filter_melee",
+                    name: $t("sfui_invpanel_filter_melee"),
+                },
+                rarity: {
+                    id: `rarity_ancient_weapon`,
+                    name: $t(`rarity_ancient_weapon`),
+                    color: getRarityColor(`rarity_ancient_weapon`),
+                },
+                stattrak: type === "rare_special_vanilla_stattrak",
+                paint_index: null,
+                market_hash_name: skinMarketHashName({
+                    itemName: $t(knife.item_name, true),
+                    pattern: null,
+                    wear: null,
+                    isStatTrak: type === "rare_special_vanilla_stattrak",
+                    isSouvenir: false,
+                    isWeapon: false,
+                    isVanilla: true,
+                }),
+                team: {
+                    id: "both",
+                    name: $t("inv_filter_both_teams"),
+                },
+                style: {
+                    id: 0,
+                    name: $t(`SFUI_ItemInfo_FinishStyle_0`),
+                    url: getFinishStyleLink(0),
+                },
+                legacy_model: true,
+                image:
+                    cdnImages[`econ/weapons/base_weapons/${knife.name}`] ??
+                    getImageUrl(`econ/weapons/base_weapons/${knife.name}`),
 
-                    // Return original attributes from item_game.json
-                    original: {
-                        name: knife.name,
-                        image_inventory: `econ/weapons/base_weapons/${knife.name}`,
-                    },
-                }))
-            )
-            .flatMap(level1 => level1),
+                // Return original attributes from item_game.json
+                original: {
+                    name: knife.name,
+                    image_inventory: `econ/weapons/base_weapons/${knife.name}`,
+                },
+            }))
+        ),
     ].filter(skin => !skin.name.includes("null") && skin.rarity.id);
 
     saveDataJson(`./public/api/${folder}/skins_not_grouped.json`, skins);
-};
+}
