@@ -1,4 +1,4 @@
-import * as fs from "node:fs";
+import * as fs from "node:fs/promises";
 import { LANGUAGES_URL } from "./constants.js";
 import { getAgents } from "./services/agents.js";
 import { getBaseWeapons } from "./services/baseWeapons.js";
@@ -26,9 +26,9 @@ let existingManifestId = "";
 const latestManifestId = await getManifestId();
 
 try {
-    existingManifestId = fs.readFileSync("./manifestIdUpdate.txt");
+    existingManifestId = await fs.readFile("./manifestIdUpdate.txt", { encoding: "utf-8" });
 } catch (err) {
-    if (err.code != "ENOENT") {
+    if (err.code !== "ENOENT") {
         throw err;
     }
 }
@@ -38,7 +38,7 @@ if (isForce) {
 } else {
     // TODO: Need to check if default_generated.json from counter-strike-image-tracker repo has changed,
     // since we now pull data from there too.
-    if (existingManifestId == latestManifestId) {
+    if (existingManifestId === latestManifestId) {
         console.log("Latest manifest Id matches existing manifest Id, exiting");
         process.exit(0);
     } else {
@@ -48,7 +48,7 @@ if (isForce) {
 
 await loadData();
 
-await Promise.all(
+const results = await Promise.allSettled(
     LANGUAGES_URL.map(async language => {
         console.log(`Language: ${language.language}`);
 
@@ -77,8 +77,4 @@ await Promise.all(
     })
 );
 
-try {
-    fs.writeFileSync("./manifestIdUpdate.txt", latestManifestId.toString());
-} catch (err) {
-    throw err;
-}
+await fs.writeFile("./manifestIdUpdate.txt", latestManifestId.toString());

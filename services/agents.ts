@@ -1,12 +1,20 @@
-import { saveDataJson } from "../utils/saveDataJson.js";
-import { $t, languageData } from "./translations.js";
-import { state } from "./main.js";
-import { getRarityColor } from "../utils/index.js";
 import { getImageUrl } from "../constants.js";
+import { getRarityColor } from "../utils/index.js";
+import { saveDataJson } from "../utils/saveDataJson.js";
+import { state } from "./main.js";
+import { $t, languageData } from "./translations.js";
 
-const isAgent = item => item.prefab === "customplayertradable";
+const isAgent = (item: { prefab: string }) => item.prefab === "customplayertradable";
 
-const parseItem = item => {
+const parseItem = (item: {
+    name: string;
+    object_id: any;
+    item_name: any;
+    item_description: any;
+    item_rarity: any;
+    used_by_classes: {};
+    model_player: any;
+}) => {
     const { collectionsBySkins, cdnImages } = state;
 
     const image =

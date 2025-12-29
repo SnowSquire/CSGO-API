@@ -1,5 +1,5 @@
-import fs from "fs";
-import path from "path";
+import fs from "node:fs/promises";
+import path from "node:path";
 import { LANGUAGES_URL } from "./constants.js";
 import { getManifestId } from "./services/main.js";
 
@@ -20,15 +20,15 @@ const inputFilePathsTemplate = [
     "./public/api/{lang}/sticker_slabs.json",
     "./public/api/{lang}/keychains.json",
     "./public/api/{lang}/tools.json",
-];
+] as const;
 
 let existingManifestId = "";
 const latestManifestId = await getManifestId();
 
 try {
-    existingManifestId = fs.readFileSync("./manifestIdGroup.txt");
+    existingManifestId = await fs.readFile("./manifestIdGroup.txt", { encoding: "utf-8" });
 } catch (err) {
-    if (err.code != "ENOENT") {
+    if (err.code !== "ENOENT") {
         throw err;
     }
 }
@@ -38,7 +38,7 @@ if (isForce) {
 } else {
     // TODO: Need to check if default_generated.json from counter-strike-image-tracker repo has changed,
     // since we now pull data from there too.
-    if (existingManifestId == latestManifestId) {
+    if (existingManifestId === latestManifestId) {
         console.log("Latest manifest Id matches existing manifest Id, exiting");
         process.exit(0);
     } else {
@@ -46,36 +46,39 @@ if (isForce) {
     }
 }
 
-for (let langObj of LANGUAGES_URL) {
+for (const langObj of LANGUAGES_URL) {
     const lang = langObj.folder;
-    const allData = {};
+    const allData: Record<string, any> = {};
 
     const inputFilePaths = inputFilePathsTemplate.map(templatePath => templatePath.replace("{lang}", lang));
 
-    for (let filePath of inputFilePaths) {
-        const fullPath = path.join(process.cwd(), filePath);
-
-        // Check if file exists before reading
-        if (fs.existsSync(fullPath)) {
-            const fileData = JSON.parse(fs.readFileSync(fullPath, "utf-8"));
-            if (Array.isArray(fileData)) {
-                fileData.forEach(item => {
-                    allData[item.id] = item;
-                });
+    await Promise.all(
+        inputFilePaths.map(async filePath => {
+            const fullPath = path.join(process.cwd(), filePath);
+            try {
+                await fs.access(fullPath);
+                const fileContent = await fs.readFile(fullPath, "utf-8");
+                const fileData = JSON.parse(fileContent);
+                if (Array.isArray(fileData)) {
+                    fileData.forEach(item => {
+                        allData[item.id] = item;
+                    });
+                }
+            } catch (err) {
+                const e = err as NodeJS.ErrnoException | undefined;
+                if (e?.code === "ENOENT") {
+                    console.warn(`File not found: ${fullPath}, skipping.`);
+                    return;
+                }
+                throw err;
             }
-        } else {
-            console.warn(`File ${fullPath} not found.`);
-        }
-    }
+        })
+    );
 
     const outputFilePath = `./public/api/${lang}/all.json`;
-    fs.writeFileSync(outputFilePath, JSON.stringify(allData));
+    await fs.writeFile(outputFilePath, JSON.stringify(allData));
 
     console.log(`all.json for ${lang} has been generated.`);
 }
 
-try {
-    fs.writeFileSync("./manifestIdGroup.txt", latestManifestId.toString());
-} catch (err) {
-    throw err;
-}
+await fs.writeFile("./manifestIdGroup.txt", latestManifestId.toString());
