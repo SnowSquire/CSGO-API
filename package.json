@@ -1,18 +1,24 @@
 {
-  "type": "module",
-  "dependencies": {
-    "axios": "^1.13.2",
-    "sha1": "^1.1.1"
-  },
-  "devDependencies": {
-    "prettier": "^3.7.4"
-  },
-  "scripts": {
-    "update-data": "node update.js",
-    "group-data": "node group.js",
-    "update-data-force": "node update.js --force",
-    "group-data-force": "node group.js --force",
-    "generate-docs": "node scripts/generate-docs.js",
-    "format": "prettier --write \"**/*.js\" --ignore-path .gitignore"
-  }
+	"name": "csgo-api",
+	"type": "module",
+	"private": true,
+	"dependencies": {
+		"@biomejs/biome": "^2.3.10",
+		"axios": "^1.13.2",
+		"sha1": "^1.1.1"
+	},
+	"devDependencies": {
+		"prettier": "^3.7.4"
+	},
+	"peerDependencies": {
+		"typescript": "^5.9.3"
+	},
+	"scripts": {
+		"update-data": "bun update.js",
+		"group-data": "bun group.js",
+		"update-data-force": "bun update.js --force",
+		"group-data-force": "bun group.js --force",
+		"generate-docs": "bun scripts/generate-docs.js",
+		"format": "prettier --write \"**/*.js\" --ignore-path .gitignore"
+	}
 }
