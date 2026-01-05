@@ -1,0 +1,16 @@
+{
+    "configurations": [
+        {
+            "type": "bun",
+            "internalConsoleOptions": "neverOpen",
+            "request": "launch",
+            "name": "Debug File",
+            "program": "${file}",
+            "args": ["--force"],
+
+            "cwd": "${workspaceFolder}",
+            "stopOnEntry": false,
+            "watchMode": false
+        }
+    ]
+}

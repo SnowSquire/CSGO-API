@@ -11,6 +11,7 @@ export type LanguageResource = {
 };
 
 export function $t(key: string, useDefault = false, languageResource: LanguageResource) {
+    if (key == null) debugger;
     key = key.replace("#", "").toLowerCase();
 
     if (useDefault) {

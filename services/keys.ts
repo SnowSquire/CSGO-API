@@ -3,6 +3,16 @@ import type { ProcessedItem } from "../types.js";
 import type { State } from "./main.js";
 import { $t, type LanguageResource } from "./translations.js";
 
+const genericValveKey = {
+    object_id: "1203",
+    item_name: "#CSGO_Tool_WeaponCase_Key",
+    item_description: "#CSGO_Tool_WeaponCase_Key_Desc",
+    image_inventory: "econ/tools/weapon_case_key",
+    tool: {
+        restriction: "generic_valve_key",
+    },
+} as const;
+
 function isKey(item: ProcessedItem): boolean {
     if (item.item_name === undefined) {
         return false;
@@ -24,7 +34,7 @@ function isKey(item: ProcessedItem): boolean {
 }
 
 function parseItem(
-    item: ProcessedItem,
+    item: ProcessedItem | typeof genericValveKey,
     state: { items: State["items"]; cdnImages: State["cdnImages"] },
     languageResource: LanguageResource
 ) {
@@ -64,16 +74,16 @@ function parseItem(
         cdnImages[item.image_inventory!.toLowerCase()] ?? getImageUrl(item.image_inventory!.toLowerCase());
     const crates = Object.values(items)
         .filter(
-            (crate: any) =>
+            crate =>
                 ["sticker_capsule", "weapon_case"].includes(crate.prefab) &&
-                crate?.tool?.restriction === (item as any)?.tool?.restriction
+                crate?.tool?.restriction === item?.tool?.restriction
         )
-        .map((crate: any) => ({
+        .map(crate => ({
             id: `crate-${crate.object_id}`,
-            name: $t(crate.item_name, false, languageResource),
+            name: $t(crate.item_name!, false, languageResource),
             image:
-                cdnImages[crate.image_inventory.toLowerCase()] ??
-                getImageUrl(crate.image_inventory.toLowerCase()),
+                cdnImages[crate.image_inventory!.toLowerCase()] ??
+                getImageUrl(crate.image_inventory!.toLowerCase()),
         }));
 
     return {
@@ -81,7 +91,7 @@ function parseItem(
         name: $t(item.item_name!, false, languageResource),
         description:
             $t(item.item_description ?? "", false, languageResource) ??
-            $t(item.item_description_prefab ?? "", false, languageResource),
+            $t((item as ProcessedItem).item_description_prefab ?? "", false, languageResource),
         def_index: item.object_id,
         crates,
         market_hash_name: marketable.includes(item.item_name!)
@@ -107,18 +117,11 @@ export function getKeys(
 ) {
     const { items } = state;
 
-    const seen: any = {};
+    const seen: Record<string, boolean> = {};
+
     const keys = [
         // Hardcoded generic valve key that I can't find in `items`.
-        {
-            object_id: "generic_valve_key",
-            item_name: "#CSGO_Tool_WeaponCase_Key",
-            item_description: "#CSGO_Tool_WeaponCase_Key_Desc",
-            image_inventory: "econ/tools/weapon_case_key",
-            tool: {
-                restriction: "generic_valve_key",
-            },
-        } as any,
+        genericValveKey,
         ...Object.values(items).filter(isKey),
     ]
         .map(item => parseItem(item, state, languageResource))

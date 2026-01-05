@@ -415,11 +415,14 @@ export function loadSkinsByCrates(
             .filter((i): i is SkinItem => i != null);
 
         if (item.includes("_stattrak_") && item.includes("musickit")) {
-            result[item] = extractedItems.map(skinItem => ({
-                ...skinItem,
-                id: `${skinItem.id}_st`,
-                name: typeof skinItem.name === "string" ? `${skinItem.name}_stattrak` : skinItem.name,
-            }));
+            result[item] = extractedItems.map(skinItem => {
+                console.assert(typeof skinItem !== "string", "Expected skinItem to be an object");
+                return {
+                    ...skinItem,
+                    id: `${skinItem.id}_st`,
+                    name: typeof skinItem.name === "string" ? `${skinItem.name}_stattrak` : skinItem.name,
+                };
+            });
         } else {
             result[item] = extractedItems;
         }

@@ -1,6 +1,10 @@
+import { configure } from "arktype/config";
+
+configure({ onUndeclaredKey: "reject" });
+
 import * as fs from "node:fs/promises";
-import { get } from "node:http";
-import { CSGO_ENGLISH_URL, DEFAULT_LANGUAGE, LANGUAGES_URL } from "./constants.js";
+
+import { DEFAULT_LANGUAGE, LANGUAGES_URL } from "./constants.js";
 import { getAgents } from "./services/agents.js";
 import { getBaseWeapons } from "./services/baseWeapons.js";
 import { getCollectibles } from "./services/collectibles.js";
@@ -10,7 +14,7 @@ import { getGraffiti } from "./services/graffiti.js";
 import { getHighlights } from "./services/highlights.js";
 import { getKeychains } from "./services/keychains.js";
 import { getKeys } from "./services/keys.js";
-import { getManifestId, loadData, state } from "./services/main.js";
+import { getManifestId, loadData } from "./services/main.js";
 import { getMusicKits } from "./services/musicKits.js";
 import { getPatches } from "./services/patches.js";
 import { getSkins } from "./services/skins.js";
@@ -84,7 +88,7 @@ async function main() {
             const collections = getCollections(appState, languageresource);
             const crates = getCrates(appState, languageresource, language.folder);
             const graffiti = getGraffiti(appState, languageresource);
-            const highlights = getHighlights(appState, languageresource);
+            const highlights = getHighlights(appState, languageresource, language.folder);
             const keychains = getKeychains(appState, languageresource);
             const keys = getKeys(appState, languageresource);
             const musicKits = getMusicKits(appState, languageresource);
@@ -118,7 +122,7 @@ async function main() {
             console.log(error);
         }
     }
-
+    await Bun.write("state.json", JSON.stringify(appState, null, 2));
     await fs.writeFile("./manifestIdUpdate.txt", latestManifestId.toString());
 }
 if (import.meta.main) {

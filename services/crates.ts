@@ -151,11 +151,11 @@ function parseItem(
             skinsByCrates?.[item.tags?.ItemSet?.tag_value as string] ??
             skinsByCrates?.[keyLootList as string] ??
             []
-        ).map((i: any) => ({
+        ).map(i => ({
             ...i,
             name:
                 i.name instanceof Object
-                    ? `${$t(i.name.weapon, false, languageResource)} | ${$t(i.name.pattern, false, languageResource)}`
+                    ? `${$t(i.name.weapon, false, languageResource)} | ${$t(i.name.pattern!, false, languageResource)}`
                     : $t(i.name, false, languageResource),
             rarity: {
                 id: i.rarity,
@@ -163,22 +163,43 @@ function parseItem(
                 color: getRarityColor(i.rarity),
             },
         })),
-        contains_rare: (skinsByCrates?.[`rare-${keyLootList}`] ?? []).map((i: any) => ({
-            ...i,
-            name: $tc(
-                i.name?.tKey ?? JSON.stringify(i.name),
-                {
-                    item_name: $t(i.name.weapon, false, languageResource) ?? "",
-                    pattern: $t(i.name.pattern, false, languageResource) ?? "",
+        // double dash is intended here
+        contains_rare: (skinsByCrates?.[`rare--${keyLootList}`] ?? []).map(i => {
+            if (typeof i.name === "string") {
+                throw Error("Expected i.name to be an object");
+            }
+            const lol = [
+                "collectible_genuine",
+                "rare_special",
+                "rare_special_with_wear",
+                "rare_special_with_wear_stattrak",
+                "rare_special_vanilla",
+                "rare_special_vanilla_stattrak",
+                "skin",
+                "skin_stattrak",
+                "skin_souvenir",
+            ];
+            const key = i.name.tKey ?? JSON.stringify(i.name);
+            if (!lol.includes(key)) {
+                throw Error(`Invalid rare item rarity '${key}' in crate '${item.item_name}': ${key}`);
+            }
+            return {
+                ...i,
+                name: $tc(
+                    key as Parameters<typeof $tc>[0],
+                    {
+                        item_name: $t(i.name.weapon ?? "", false, languageResource) ?? "",
+                        pattern: $t(i.name.pattern ?? "", false, languageResource) ?? "",
+                    },
+                    language
+                ),
+                rarity: {
+                    id: i.rarity,
+                    name: $t(i.rarity, false, languageResource),
+                    color: getRarityColor(i.rarity),
                 },
-                language
-            ),
-            rarity: {
-                id: i.rarity,
-                name: $t(i.rarity, false, languageResource),
-                color: getRarityColor(i.rarity),
-            },
-        })),
+            };
+        }),
         special_notes: specialNotes?.[`crate-${item.object_id}` as keyof typeof specialNotes],
         market_hash_name: getMarketHashName(item, languageResource),
         rental: Boolean(item.attributes?.["can open for rental"]),
@@ -237,7 +258,7 @@ export function getCrates(
     const crates = Object.values(items)
         .filter(isCrate)
         .flatMap(item => parseItem(item, prefabs, state, languageResource, language))
-        .filter((crate: any) => crate.name);
+        .filter(crate => crate.name);
 
     return crates;
 }
