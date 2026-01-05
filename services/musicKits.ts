@@ -1,21 +1,29 @@
 import { getImageUrl } from "../constants.js";
+import type { ProcessedMusicDefinition } from "../types.js";
 import { getRarityColor, isExclusive } from "../utils/index.js";
-import { saveDataJson } from "../utils/saveDataJson.js";
-import { state } from "./main.js";
-import { $t, languageData } from "./translations.js";
+import type { State } from "./main.js";
+import { $t, type LanguageResource } from "./translations.js";
 
-function getDescription(item, isStattrak) {
+function getDescription(
+    item: ProcessedMusicDefinition,
+    isStattrak: boolean,
+    languageResource: LanguageResource
+) {
     const stattrakText = isStattrak
-        ? `<span style='color:#99ccff;'>${$t("attrib_killeater")}</span><br/><br/><span style='color:#cf6a32;'>${$t("killeaterdescriptionnotice_ocmvps")}</span><br/><br/>`
+        ? `<span style='color:#99ccff;'>${$t("attrib_killeater", false, languageResource)}</span><br/><br/><span style='color:#cf6a32;'>${$t("killeaterdescriptionnotice_ocmvps", false, languageResource)}</span><br/><br/>`
         : "";
 
-    return `${stattrakText}${$t("csgo_musickit_desc")}<br/><br/>${$t(item.loc_description)}`;
+    return `${stattrakText}${$t("csgo_musickit_desc", false, languageResource)}<br/><br/>${$t(item.loc_description, false, languageResource)}`;
 }
 
-function parseItem(item) {
+function parseItem(
+    item: ProcessedMusicDefinition,
+    state: { cdnImages: State["cdnImages"] },
+    languageResource: LanguageResource
+) {
     const { cdnImages } = state;
     const image =
-        cdnImages[item.image_inventory.toLowerCase()] ?? getImageUrl(item.image_inventory.toLowerCase());
+        cdnImages[item.image_inventory!.toLowerCase()] ?? getImageUrl(item.image_inventory!.toLowerCase());
     const exclusive = isExclusive(item.name);
     const valve = ["valve_01", "valve_02", "valve_cs2_01"].includes(item.name);
 
@@ -42,47 +50,55 @@ function parseItem(item) {
     if (!kitsOnlyStattrak.includes(item.name)) {
         const normalMusicKit = {
             id: `music_kit-${item.object_id}`,
-            name: exclusive || valve ? $t(item.loc_name) : $t(item.coupon_name),
-            description: getDescription(item, false),
+            name:
+                exclusive || valve
+                    ? $t(item.loc_name, false, languageResource)
+                    : $t(item.coupon_name!, false, languageResource),
+            description: getDescription(item, false, languageResource),
             def_index: item.object_id,
             rarity: {
                 id: "rarity_rare",
-                name: $t("rarity_rare"),
+                name: $t("rarity_rare", false, languageResource),
                 color: getRarityColor(`rarity_rare`),
             },
-            market_hash_name: exclusive || valve ? null : `Music Kit | ${$t(`musickit_${item.name}`, true)}`,
+            market_hash_name:
+                exclusive || valve
+                    ? null
+                    : `Music Kit | ${$t(`musickit_${item.name}`, true, languageResource)}`,
             exclusive,
             image,
 
             // Return original attributes from item_game.json
             original: {
                 name: item.name,
-                image_inventory: item.image_inventory.toLowerCase(),
+                image_inventory: item.image_inventory!.toLowerCase(),
             },
         };
 
         kits.push(normalMusicKit);
     }
 
-    if ($t(`${item.coupon_name}_stattrak`)) {
+    if ($t(`${item.coupon_name}_stattrak`, false, languageResource)) {
         const stattrakMusicKit = {
             id: `music_kit-${item.object_id}_st`,
-            name: $t(`${item.coupon_name}_stattrak`),
-            description: getDescription(item, true),
+            name: $t(`${item.coupon_name}_stattrak`, false, languageResource),
+            description: getDescription(item, true, languageResource),
             def_index: item.object_id,
             rarity: {
                 id: "rarity_rare",
-                name: $t("rarity_rare"),
+                name: $t("rarity_rare", false, languageResource),
                 color: getRarityColor(`rarity_rare`),
             },
-            market_hash_name: exclusive ? null : `StatTrak™ Music Kit | ${$t(`musickit_${item.name}`, true)}`,
+            market_hash_name: exclusive
+                ? null
+                : `StatTrak™ Music Kit | ${$t(`musickit_${item.name}`, true, languageResource)}`,
             exclusive: false,
             image,
 
             // Return original attributes from item_game.json
             original: {
                 name: item.name,
-                image_inventory: item.image_inventory.toLowerCase(),
+                image_inventory: item.image_inventory!.toLowerCase(),
             },
         };
 
@@ -92,11 +108,18 @@ function parseItem(item) {
     return kits;
 }
 
-export function getMusicKits() {
+export function getMusicKits(
+    state: {
+        musicDefinitions: State["musicDefinitions"];
+        cdnImages: State["cdnImages"];
+    },
+    languageResource: LanguageResource
+) {
     const { musicDefinitions } = state;
-    const { folder } = languageData;
 
-    const musicKits = musicDefinitions.map(parseItem).reduce((acc, kits) => acc.concat(kits), []);
+    const musicKits = musicDefinitions
+        .map(item => parseItem(item, state, languageResource))
+        .reduce((acc: any[], kits: any[]) => acc.concat(kits), []);
 
-    saveDataJson(`./public/api/${folder}/music_kits.json`, musicKits);
+    return musicKits;
 }

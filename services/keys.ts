@@ -1,9 +1,9 @@
 import { getImageUrl } from "../constants.js";
-import { saveDataJson } from "../utils/saveDataJson.js";
-import { state } from "./main.js";
-import { $t, languageData } from "./translations.js";
+import type { ProcessedItem } from "../types.js";
+import type { State } from "./main.js";
+import { $t, type LanguageResource } from "./translations.js";
 
-function isKey(item) {
+function isKey(item: ProcessedItem) {
     if (item.item_name === undefined) {
         return false;
     }
@@ -16,12 +16,6 @@ function isKey(item) {
         return false;
     }
 
-    // if (!item.item_name.startsWith("#CSGO_crate")) {
-    //     return false;
-    // }
-    // if (item.item_name.includes("contestwinner")) {
-    //     return false;
-    // }
     if (!item?.prefab?.includes("weapon_case_key")) {
         return false;
     }
@@ -29,7 +23,11 @@ function isKey(item) {
     return true;
 }
 
-function parseItem(item) {
+function parseItem(
+    item: ProcessedItem | any,
+    state: { items: State["items"]; cdnImages: State["cdnImages"] },
+    languageResource: LanguageResource
+) {
     const { items, cdnImages } = state;
 
     const marketable = [
@@ -59,32 +57,20 @@ function parseItem(item) {
         "#CSGO_crate_key_community_20",
         "#CSGO_crate_key_community_21",
         "#CSGO_crate_key_community_22",
-        // "#CSGO_crate_key_community_23",
         "#CSGO_crate_key_community_24",
-        // "#CSGO_crate_key_community_25",
-        // "#CSGO_crate_key_community_26",
-        // "#CSGO_crate_key_community_27",
-        // "#CSGO_crate_key_community_28",
-        // "#CSGO_crate_key_community_29",
-        // "#CSGO_crate_key_community_30",
-        // "#CSGO_crate_key_community_31",
-        // "#CSGO_crate_key_community_32",
-        // "#CSGO_crate_key_community_33",
-        // "#CSGO_crate_key_community_34",
-        // "#CSGO_crate_key_community_35",
     ];
 
     const image =
-        cdnImages[item.image_inventory.toLowerCase()] ?? getImageUrl(item.image_inventory.toLowerCase());
+        cdnImages[item.image_inventory!.toLowerCase()] ?? getImageUrl(item.image_inventory!.toLowerCase());
     const crates = Object.values(items)
         .filter(
-            crate =>
+            (crate: any) =>
                 ["sticker_capsule", "weapon_case"].includes(crate.prefab) &&
-                crate?.tool?.restriction === item.tool?.restriction
+                crate?.tool?.restriction === (item as any)?.tool?.restriction
         )
-        .map(crate => ({
+        .map((crate: any) => ({
             id: `crate-${crate.object_id}`,
-            name: $t(crate.item_name),
+            name: $t(crate.item_name, false, languageResource),
             image:
                 cdnImages[crate.image_inventory.toLowerCase()] ??
                 getImageUrl(crate.image_inventory.toLowerCase()),
@@ -92,27 +78,36 @@ function parseItem(item) {
 
     return {
         id: `key-${item.object_id}`,
-        name: $t(item.item_name),
-        description: $t(item.item_description) ?? $t(item.item_description_prefab),
+        name: $t(item.item_name!, false, languageResource),
+        description:
+            $t(item.item_description, false, languageResource) ??
+            $t(item.item_description_prefab, false, languageResource),
         def_index: item.object_id,
         crates,
-        market_hash_name: marketable.includes(item.item_name) ? $t(item.item_name, true) : null,
-        marketable: marketable.includes(item.item_name),
+        market_hash_name: marketable.includes(item.item_name!)
+            ? $t(item.item_name!, true, languageResource)
+            : null,
+        marketable: marketable.includes(item.item_name!),
         image,
 
         // Return original attributes from item_game.json
         original: {
             item_name: item.item_name,
-            image_inventory: item.image_inventory.toLowerCase(),
+            image_inventory: item.image_inventory!.toLowerCase(),
         },
     };
 }
 
-export function getKeys() {
+export function getKeys(
+    state: {
+        items: State["items"];
+        cdnImages: State["cdnImages"];
+    },
+    languageResource: LanguageResource
+) {
     const { items } = state;
-    const { folder } = languageData;
 
-    const seen = {};
+    const seen: any = {};
     const keys = [
         // Hardcoded generic valve key that I can't find in `items`.
         {
@@ -123,13 +118,12 @@ export function getKeys() {
             tool: {
                 restriction: "generic_valve_key",
             },
-        },
+        } as any,
         ...Object.values(items).filter(isKey),
     ]
-        .map(parseItem)
+        .map(item => parseItem(item, state, languageResource))
         .filter(({ name, image }) => {
             // Filter repeted keys
-            // https://github.com/ByMykel/CSGO-API/issues/107
             if (seen[image]) {
                 return false;
             }
@@ -137,5 +131,5 @@ export function getKeys() {
             return name;
         });
 
-    saveDataJson(`./public/api/${folder}/keys.json`, keys);
+    return keys;
 }

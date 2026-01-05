@@ -44,8 +44,11 @@ async function main() {
             console.log("Latest manifest Id does not match existing manifest Id, generating new data.");
         }
     }
-    const state = await loadData();
-    type LanguageData = { translationByKey: Record<string, string>; translationKeyByIndex: string[] };
+    const appState = await loadData();
+    type LanguageData = {
+        translationByKey: Record<string, string>;
+        translationKeyByIndex: string[];
+    };
 
     const translationData: Record<
         string, // Languge Id
@@ -76,26 +79,40 @@ async function main() {
             selected_idx: translationData[language.language]!.translationKeyByIndex,
         };
         try {
-            const agents = getAgents(state, languageresource);
-            const collectibles = getCollectibles(state, languageresource, language.folder);
-            // getCollections();
-            // getCrates();
-            // getGraffiti();
-            // getKeys();
-            // getMusicKits();
-            // getPatches();
-            // getSkins();
-            // getSkinsNotGrouped();
-            // getStickers();
-            // getStickerSlabs();
-            // getKeychains();
-            // getTools();
-            // getBaseWeapons();
-            // getHighlights();
+            const agents = getAgents(appState, languageresource);
+            const collectibles = getCollectibles(appState, languageresource, language.folder);
+            const collections = getCollections(appState, languageresource);
+            const crates = getCrates(appState, languageresource, language.folder);
+            const graffiti = getGraffiti(appState, languageresource);
+            const highlights = getHighlights(appState, languageresource);
+            const keychains = getKeychains(appState, languageresource);
+            const keys = getKeys(appState, languageresource);
+            const musicKits = getMusicKits(appState, languageresource);
+            const patches = getPatches(appState, languageresource);
+            const skins = getSkins(appState, languageresource, language.folder);
+            const skinsNotGrouped = getSkinsNotGrouped(appState, languageresource, language.folder);
+            const stickerSlabs = getStickerSlabs(appState, languageresource);
+            const stickers = getStickers(appState, languageresource);
+            const tools = getTools(appState, languageresource);
+            const baseWeapons = getBaseWeapons(appState, languageresource);
 
-            Promise.all([
+            await Promise.all([
                 saveDataJson(`./public/api/${language.folder}/agents.json`, agents),
                 saveDataJson(`./public/api/${language.folder}/collectibles.json`, collectibles),
+                saveDataJson(`./public/api/${language.folder}/collections.json`, collections),
+                saveDataJson(`./public/api/${language.folder}/crates.json`, crates),
+                saveDataJson(`./public/api/${language.folder}/graffiti.json`, graffiti),
+                saveDataJson(`./public/api/${language.folder}/highlights.json`, highlights),
+                saveDataJson(`./public/api/${language.folder}/keychains.json`, keychains),
+                saveDataJson(`./public/api/${language.folder}/keys.json`, keys),
+                saveDataJson(`./public/api/${language.folder}/music_kits.json`, musicKits),
+                saveDataJson(`./public/api/${language.folder}/patches.json`, patches),
+                saveDataJson(`./public/api/${language.folder}/skins.json`, skins),
+                saveDataJson(`./public/api/${language.folder}/skins_not_grouped.json`, skinsNotGrouped),
+                saveDataJson(`./public/api/${language.folder}/sticker_slabs.json`, stickerSlabs),
+                saveDataJson(`./public/api/${language.folder}/stickers.json`, stickers),
+                saveDataJson(`./public/api/${language.folder}/tools.json`, tools),
+                saveDataJson(`./public/api/${language.folder}/base_weapons.json`, baseWeapons),
             ]);
         } catch (error) {
             console.log(error);

@@ -1,18 +1,21 @@
 import { getImageUrl } from "../constants.js";
 import { weaponIDMapping } from "../utils/index.js";
-import { saveDataJson } from "../utils/saveDataJson.js";
-import { state } from "./main.js";
-import { $t, languageData } from "./translations.js";
+import type { State } from "./main.js";
+import { $t, type LanguageResource } from "./translations.js";
 
-export function getBaseWeapons() {
+export function getBaseWeapons(
+    state: {
+        cdnImages: State["cdnImages"];
+    },
+    languageResource: LanguageResource
+) {
     const { cdnImages } = state;
-    const { folder } = languageData;
 
     const baseWeapons = [
         {
             id: "base_weapon-ct_gloves",
-            name: $t(`csgo_wearable_ct_defaultgloves`),
-            description: $t(`csgo_wearable_ct_defaultgloves_desc`),
+            name: $t(`csgo_wearable_ct_defaultgloves`, false, languageResource),
+            description: $t(`csgo_wearable_ct_defaultgloves_desc`, false, languageResource),
             def_index: weaponIDMapping.ct_gloves,
             image:
                 cdnImages["econ/weapons/base_weapons/ct_gloves"] ??
@@ -20,8 +23,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-t_gloves",
-            name: $t(`csgo_wearable_t_defaultgloves`),
-            description: $t(`csgo_wearable_t_defaultgloves_desc`),
+            name: $t(`csgo_wearable_t_defaultgloves`, false, languageResource),
+            description: $t(`csgo_wearable_t_defaultgloves_desc`, false, languageResource),
             def_index: weaponIDMapping.t_gloves,
             image:
                 cdnImages["econ/weapons/base_weapons/t_gloves"] ??
@@ -29,8 +32,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_ak47",
-            name: $t(`sfui_wpnhud_ak47`),
-            description: $t(`csgo_item_desc_ak47`),
+            name: $t(`sfui_wpnhud_ak47`, false, languageResource),
+            description: $t(`csgo_item_desc_ak47`, false, languageResource),
             def_index: weaponIDMapping.weapon_ak47,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_ak47"] ??
@@ -38,8 +41,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_aug",
-            name: $t(`sfui_wpnhud_aug`),
-            description: $t(`csgo_item_desc_aug`),
+            name: $t(`sfui_wpnhud_aug`, false, languageResource),
+            description: $t(`csgo_item_desc_aug`, false, languageResource),
             def_index: weaponIDMapping.weapon_aug,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_aug"] ??
@@ -47,8 +50,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_awp",
-            name: $t(`sfui_wpnhud_awp`),
-            description: $t(`csgo_item_desc_awp`),
+            name: $t(`sfui_wpnhud_awp`, false, languageResource),
+            description: $t(`csgo_item_desc_awp`, false, languageResource),
             def_index: weaponIDMapping.weapon_awp,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_awp"] ??
@@ -56,8 +59,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_bayonet",
-            name: $t(`sfui_wpnhud_knifebayonet`),
-            description: $t(`csgo_item_desc_knife_bayonet`),
+            name: $t(`sfui_wpnhud_knifebayonet`, false, languageResource),
+            description: $t(`csgo_item_desc_knife_bayonet`, false, languageResource),
             def_index: weaponIDMapping.weapon_bayonet,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_bayonet"] ??
@@ -65,8 +68,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_bizon",
-            name: $t(`sfui_wpnhud_bizon`),
-            description: $t(`csgo_item_desc_bizon`),
+            name: $t(`sfui_wpnhud_bizon`, false, languageResource),
+            description: $t(`csgo_item_desc_bizon`, false, languageResource),
             def_index: weaponIDMapping.weapon_bizon,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_bizon"] ??
@@ -74,8 +77,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_c4",
-            name: $t(`sfui_wpnhud_c4`),
-            description: $t(`csgo_item_desc_c4`),
+            name: $t(`sfui_wpnhud_c4`, false, languageResource),
+            description: $t(`csgo_item_desc_c4`, false, languageResource),
             def_index: weaponIDMapping.weapon_c4,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_c4"] ??
@@ -83,8 +86,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_cz75a",
-            name: $t(`sfui_wpnhud_cz75`),
-            description: $t(`csgo_item_desc_cz75a`),
+            name: $t(`sfui_wpnhud_cz75`, false, languageResource),
+            description: $t(`csgo_item_desc_cz75a`, false, languageResource),
             def_index: weaponIDMapping.weapon_cz75a,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_cz75a"] ??
@@ -92,8 +95,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_deagle",
-            name: $t(`sfui_wpnhud_deagle`),
-            description: $t(`csgo_item_desc_deserteagle`),
+            name: $t(`sfui_wpnhud_deagle`, false, languageResource),
+            description: $t(`csgo_item_desc_deserteagle`, false, languageResource),
             def_index: weaponIDMapping.weapon_deagle,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_deagle"] ??
@@ -101,8 +104,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_decoy",
-            name: $t(`sfui_wpnhud_decoy`),
-            description: $t(`csgo_item_desc_decoy`),
+            name: $t(`sfui_wpnhud_decoy`, false, languageResource),
+            description: $t(`csgo_item_desc_decoy`, false, languageResource),
             def_index: weaponIDMapping.weapon_decoy,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_decoy"] ??
@@ -110,8 +113,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_elite",
-            name: $t(`sfui_wpnhud_elite`),
-            description: $t(`csgo_item_desc_elites`),
+            name: $t(`sfui_wpnhud_elite`, false, languageResource),
+            description: $t(`csgo_item_desc_elites`, false, languageResource),
             def_index: weaponIDMapping.weapon_elite,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_elite"] ??
@@ -119,8 +122,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_famas",
-            name: $t(`sfui_wpnhud_famas`),
-            description: $t(`csgo_item_desc_famas`),
+            name: $t(`sfui_wpnhud_famas`, false, languageResource),
+            description: $t(`csgo_item_desc_famas`, false, languageResource),
             def_index: weaponIDMapping.weapon_famas,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_famas"] ??
@@ -128,8 +131,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_fiveseven",
-            name: $t(`sfui_wpnhud_fiveseven`),
-            description: $t(`csgo_item_desc_fiveseven`),
+            name: $t(`sfui_wpnhud_fiveseven`, false, languageResource),
+            description: $t(`csgo_item_desc_fiveseven`, false, languageResource),
             def_index: weaponIDMapping.weapon_fiveseven,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_fiveseven"] ??
@@ -137,8 +140,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_flashbang",
-            name: $t(`sfui_wpnhud_flashbang`),
-            description: $t(`csgo_item_desc_flashbang`),
+            name: $t(`sfui_wpnhud_flashbang`, false, languageResource),
+            description: $t(`csgo_item_desc_flashbang`, false, languageResource),
             def_index: weaponIDMapping.weapon_flashbang,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_flashbang"] ??
@@ -146,8 +149,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_g3sg1",
-            name: $t(`sfui_wpnhud_g3sg1`),
-            description: $t(`csgo_item_desc_g3sg1`),
+            name: $t(`sfui_wpnhud_g3sg1`, false, languageResource),
+            description: $t(`csgo_item_desc_g3sg1`, false, languageResource),
             def_index: weaponIDMapping.weapon_g3sg1,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_g3sg1"] ??
@@ -155,8 +158,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_galilar",
-            name: $t(`sfui_wpnhud_galilar`),
-            description: $t(`csgo_item_desc_galilar`),
+            name: $t(`sfui_wpnhud_galilar`, false, languageResource),
+            description: $t(`csgo_item_desc_galilar`, false, languageResource),
             def_index: weaponIDMapping.weapon_galilar,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_galilar"] ??
@@ -164,8 +167,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_glock",
-            name: $t(`sfui_wpnhud_glock18`),
-            description: $t(`csgo_item_desc_glock18`),
+            name: $t(`sfui_wpnhud_glock18`, false, languageResource),
+            description: $t(`csgo_item_desc_glock18`, false, languageResource),
             def_index: weaponIDMapping.weapon_glock,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_glock"] ??
@@ -173,8 +176,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_healthshot",
-            name: $t(`sfui_wpnhud_healthshot`),
-            description: $t(`csgo_item_desc_healthshot`),
+            name: $t(`sfui_wpnhud_healthshot`, false, languageResource),
+            description: $t(`csgo_item_desc_healthshot`, false, languageResource),
             def_index: weaponIDMapping.weapon_healthshot,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_healthshot"] ??
@@ -182,8 +185,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_hegrenade",
-            name: $t(`sfui_wpnhud_hegrenade`),
-            description: $t(`csgo_item_desc_hegrenade`),
+            name: $t(`sfui_wpnhud_hegrenade`, false, languageResource),
+            description: $t(`csgo_item_desc_hegrenade`, false, languageResource),
             def_index: weaponIDMapping.weapon_hegrenade,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_hegrenade"] ??
@@ -191,8 +194,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_hkp2000",
-            name: $t(`sfui_wpnhud_hkp2000`),
-            description: $t(`csgo_item_desc_hkp2000`),
+            name: $t(`sfui_wpnhud_hkp2000`, false, languageResource),
+            description: $t(`csgo_item_desc_hkp2000`, false, languageResource),
             def_index: weaponIDMapping.weapon_hkp2000,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_hkp2000"] ??
@@ -200,8 +203,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_incgrenade",
-            name: $t(`sfui_wpnhud_incgrenade`),
-            description: $t(`csgo_item_desc_incgrenade`),
+            name: $t(`sfui_wpnhud_incgrenade`, false, languageResource),
+            description: $t(`csgo_item_desc_incgrenade`, false, languageResource),
             def_index: weaponIDMapping.weapon_incgrenade,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_incgrenade"] ??
@@ -209,8 +212,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_knife_butterfly",
-            name: $t(`sfui_wpnhud_knife_butterfly`),
-            description: $t(`csgo_item_desc_knife_butterfly`),
+            name: $t(`sfui_wpnhud_knife_butterfly`, false, languageResource),
+            description: $t(`csgo_item_desc_knife_butterfly`, false, languageResource),
             def_index: weaponIDMapping.weapon_knife_butterfly,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_knife_butterfly"] ??
@@ -218,8 +221,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_knife_canis",
-            name: $t(`sfui_wpnhud_knife_canis`),
-            description: $t(`csgo_item_desc_knife_canis`),
+            name: $t(`sfui_wpnhud_knife_canis`, false, languageResource),
+            description: $t(`csgo_item_desc_knife_canis`, false, languageResource),
             def_index: weaponIDMapping.weapon_knife_canis,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_knife_canis"] ??
@@ -227,8 +230,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_knife_cord",
-            name: $t(`sfui_wpnhud_knife_cord`),
-            description: $t(`csgo_item_desc_knife_cord`),
+            name: $t(`sfui_wpnhud_knife_cord`, false, languageResource),
+            description: $t(`csgo_item_desc_knife_cord`, false, languageResource),
             def_index: weaponIDMapping.weapon_knife_cord,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_knife_cord"] ??
@@ -236,8 +239,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_knife_css",
-            name: $t(`sfui_wpnhud_knifecss`),
-            description: $t(`csgo_item_desc_knife_css`),
+            name: $t(`sfui_wpnhud_knifecss`, false, languageResource),
+            description: $t(`csgo_item_desc_knife_css`, false, languageResource),
             def_index: weaponIDMapping.weapon_knife_css,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_knife_css"] ??
@@ -245,8 +248,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_knife_falchion",
-            name: $t(`sfui_wpnhud_knife_falchion_advanced`),
-            description: $t(`csgo_item_desc_knife_falchion_advanced`),
+            name: $t(`sfui_wpnhud_knife_falchion_advanced`, false, languageResource),
+            description: $t(`csgo_item_desc_knife_falchion_advanced`, false, languageResource),
             def_index: weaponIDMapping.weapon_knife_falchion,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_knife_falchion"] ??
@@ -254,8 +257,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_knife_flip",
-            name: $t(`sfui_wpnhud_knifeflip`),
-            description: $t(`csgo_item_desc_knifeflip`),
+            name: $t(`sfui_wpnhud_knifeflip`, false, languageResource),
+            description: $t(`csgo_item_desc_knifeflip`, false, languageResource),
             def_index: weaponIDMapping.weapon_knife_flip,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_knife_flip"] ??
@@ -263,8 +266,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_knife_gut",
-            name: $t(`sfui_wpnhud_knifegut`),
-            description: $t(`csgo_item_desc_knifegut`),
+            name: $t(`sfui_wpnhud_knifegut`, false, languageResource),
+            description: $t(`csgo_item_desc_knifegut`, false, languageResource),
             def_index: weaponIDMapping.weapon_knife_gut,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_knife_gut"] ??
@@ -272,8 +275,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_knife_gypsy_jackknife",
-            name: $t(`sfui_wpnhud_knife_gypsy_jackknife`),
-            description: $t(`csgo_item_desc_knife_gypsy_jackknife`),
+            name: $t(`sfui_wpnhud_knife_gypsy_jackknife`, false, languageResource),
+            description: $t(`csgo_item_desc_knife_gypsy_jackknife`, false, languageResource),
             def_index: weaponIDMapping.weapon_knife_gypsy_jackknife,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_knife_gypsy_jackknife"] ??
@@ -281,8 +284,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_knife_karambit",
-            name: $t(`sfui_wpnhud_knifekaram`),
-            description: $t(`csgo_item_desc_knife_karam`),
+            name: $t(`sfui_wpnhud_knifekaram`, false, languageResource),
+            description: $t(`csgo_item_desc_knife_karam`, false, languageResource),
             def_index: weaponIDMapping.weapon_knife_karambit,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_knife_karambit"] ??
@@ -290,8 +293,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_knife_kukri",
-            name: $t(`sfui_wpnhud_knife_kukri`),
-            description: $t(`csgo_item_desc_knife_kukri`),
+            name: $t(`sfui_wpnhud_knife_kukri`, false, languageResource),
+            description: $t(`csgo_item_desc_knife_kukri`, false, languageResource),
             def_index: weaponIDMapping.weapon_knife_kukri,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_knife_kukri"] ??
@@ -299,8 +302,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_knife_m9_bayonet",
-            name: $t(`sfui_wpnhud_knifem9`),
-            description: $t(`csgo_item_desc_knifem9`),
+            name: $t(`sfui_wpnhud_knifem9`, false, languageResource),
+            description: $t(`csgo_item_desc_knifem9`, false, languageResource),
             def_index: weaponIDMapping.weapon_knife_m9_bayonet,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_knife_m9_bayonet"] ??
@@ -308,8 +311,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_knife_outdoor",
-            name: $t(`sfui_wpnhud_knife_outdoor`),
-            description: $t(`csgo_item_desc_knife_outdoor`),
+            name: $t(`sfui_wpnhud_knife_outdoor`, false, languageResource),
+            description: $t(`csgo_item_desc_knife_outdoor`, false, languageResource),
             def_index: weaponIDMapping.weapon_knife_outdoor,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_knife_outdoor"] ??
@@ -317,8 +320,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_knife",
-            name: $t(`sfui_wpnhud_knife`),
-            description: $t(`csgo_item_desc_knife`),
+            name: $t(`sfui_wpnhud_knife`, false, languageResource),
+            description: $t(`csgo_item_desc_knife`, false, languageResource),
             def_index: weaponIDMapping.weapon_knife,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_knife"] ??
@@ -326,8 +329,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_knife_push",
-            name: $t(`sfui_wpnhud_knife_push`),
-            description: $t(`csgo_item_desc_knife_push`),
+            name: $t(`sfui_wpnhud_knife_push`, false, languageResource),
+            description: $t(`csgo_item_desc_knife_push`, false, languageResource),
             def_index: weaponIDMapping.weapon_knife_push,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_knife_push"] ??
@@ -335,8 +338,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_knife_skeleton",
-            name: $t(`sfui_wpnhud_knife_skeleton`),
-            description: $t(`csgo_item_desc_knife_skeleton`),
+            name: $t(`sfui_wpnhud_knife_skeleton`, false, languageResource),
+            description: $t(`csgo_item_desc_knife_skeleton`, false, languageResource),
             def_index: weaponIDMapping.weapon_knife_skeleton,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_knife_skeleton"] ??
@@ -344,8 +347,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_knife_stiletto",
-            name: $t(`sfui_wpnhud_knife_stiletto`),
-            description: $t(`csgo_item_desc_knife_stiletto`),
+            name: $t(`sfui_wpnhud_knife_stiletto`, false, languageResource),
+            description: $t(`csgo_item_desc_knife_stiletto`, false, languageResource),
             def_index: weaponIDMapping.weapon_knife_stiletto,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_knife_stiletto"] ??
@@ -353,8 +356,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_knife_survival_bowie",
-            name: $t(`sfui_wpnhud_knife_survival_bowie`),
-            description: $t(`csgo_item_desc_knife_survival_bowie`),
+            name: $t(`sfui_wpnhud_knife_survival_bowie`, false, languageResource),
+            description: $t(`csgo_item_desc_knife_survival_bowie`, false, languageResource),
             def_index: weaponIDMapping.weapon_knife_survival_bowie,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_knife_survival_bowie"] ??
@@ -362,8 +365,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_knife_t",
-            name: $t(`sfui_wpnhud_knife_t`),
-            description: $t(`csgo_item_desc_knife_t`),
+            name: $t(`sfui_wpnhud_knife_t`, false, languageResource),
+            description: $t(`csgo_item_desc_knife_t`, false, languageResource),
             def_index: weaponIDMapping.weapon_knife_t,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_knife_t"] ??
@@ -371,8 +374,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_knife_tactical",
-            name: $t(`sfui_wpnhud_knifetactical`),
-            description: $t(`csgo_item_desc_knifetactical`),
+            name: $t(`sfui_wpnhud_knifetactical`, false, languageResource),
+            description: $t(`csgo_item_desc_knifetactical`, false, languageResource),
             def_index: weaponIDMapping.weapon_knife_tactical,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_knife_tactical"] ??
@@ -380,8 +383,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_knife_ursus",
-            name: $t(`sfui_wpnhud_knife_ursus`),
-            description: $t(`csgo_item_desc_knife_ursus`),
+            name: $t(`sfui_wpnhud_knife_ursus`, false, languageResource),
+            description: $t(`csgo_item_desc_knife_ursus`, false, languageResource),
             def_index: weaponIDMapping.weapon_knife_ursus,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_knife_ursus"] ??
@@ -389,8 +392,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_knife_widowmaker",
-            name: $t(`sfui_wpnhud_knife_widowmaker`),
-            description: $t(`csgo_item_desc_knife_widowmaker`),
+            name: $t(`sfui_wpnhud_knife_widowmaker`, false, languageResource),
+            description: $t(`csgo_item_desc_knife_widowmaker`, false, languageResource),
             def_index: weaponIDMapping.weapon_knife_widowmaker,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_knife_widowmaker"] ??
@@ -398,8 +401,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_m249",
-            name: $t(`sfui_wpnhud_m249`),
-            description: $t(`csgo_item_desc_m249`),
+            name: $t(`sfui_wpnhud_m249`, false, languageResource),
+            description: $t(`csgo_item_desc_m249`, false, languageResource),
             def_index: weaponIDMapping.weapon_m249,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_m249"] ??
@@ -407,8 +410,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_m4a1",
-            name: $t(`sfui_wpnhud_m4a1`),
-            description: $t(`csgo_item_desc_m4a4`),
+            name: $t(`sfui_wpnhud_m4a1`, false, languageResource),
+            description: $t(`csgo_item_desc_m4a4`, false, languageResource),
             def_index: weaponIDMapping.weapon_m4a1,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_m4a1"] ??
@@ -416,8 +419,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_m4a1_silencer",
-            name: $t(`sfui_wpnhud_m4a1_silencer`),
-            description: $t(`csgo_item_desc_m4a1_silencer`),
+            name: $t(`sfui_wpnhud_m4a1_silencer`, false, languageResource),
+            description: $t(`csgo_item_desc_m4a1_silencer`, false, languageResource),
             def_index: weaponIDMapping.weapon_m4a1_silencer,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_m4a1_silencer"] ??
@@ -425,8 +428,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_mac10",
-            name: $t(`sfui_wpnhud_mac10`),
-            description: $t(`csgo_item_desc_mac10`),
+            name: $t(`sfui_wpnhud_mac10`, false, languageResource),
+            description: $t(`csgo_item_desc_mac10`, false, languageResource),
             def_index: weaponIDMapping.weapon_mac10,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_mac10"] ??
@@ -434,8 +437,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_mag7",
-            name: $t(`sfui_wpnhud_mag7`),
-            description: $t(`csgo_item_desc_mag7`),
+            name: $t(`sfui_wpnhud_mag7`, false, languageResource),
+            description: $t(`csgo_item_desc_mag7`, false, languageResource),
             def_index: weaponIDMapping.weapon_mag7,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_mag7"] ??
@@ -443,8 +446,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_molotov",
-            name: $t(`sfui_wpnhud_molotov`),
-            description: $t(`csgo_item_desc_molotov`),
+            name: $t(`sfui_wpnhud_molotov`, false, languageResource),
+            description: $t(`csgo_item_desc_molotov`, false, languageResource),
             def_index: weaponIDMapping.weapon_molotov,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_molotov"] ??
@@ -452,8 +455,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_mp5sd",
-            name: $t(`sfui_wpnhud_mp5sd`),
-            description: $t(`csgo_item_desc_mp5sd`),
+            name: $t(`sfui_wpnhud_mp5sd`, false, languageResource),
+            description: $t(`csgo_item_desc_mp5sd`, false, languageResource),
             def_index: weaponIDMapping.weapon_mp5sd,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_mp5sd"] ??
@@ -461,8 +464,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_mp7",
-            name: $t(`sfui_wpnhud_mp7`),
-            description: $t(`csgo_item_desc_mp7`),
+            name: $t(`sfui_wpnhud_mp7`, false, languageResource),
+            description: $t(`csgo_item_desc_mp7`, false, languageResource),
             def_index: weaponIDMapping.weapon_mp7,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_mp7"] ??
@@ -470,8 +473,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_mp9",
-            name: $t(`sfui_wpnhud_mp9`),
-            description: $t(`csgo_item_desc_mp9`),
+            name: $t(`sfui_wpnhud_mp9`, false, languageResource),
+            description: $t(`csgo_item_desc_mp9`, false, languageResource),
             def_index: weaponIDMapping.weapon_mp9,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_mp9"] ??
@@ -479,8 +482,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_negev",
-            name: $t(`sfui_wpnhud_negev`),
-            description: $t(`csgo_item_desc_negev`),
+            name: $t(`sfui_wpnhud_negev`, false, languageResource),
+            description: $t(`csgo_item_desc_negev`, false, languageResource),
             def_index: weaponIDMapping.weapon_negev,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_negev"] ??
@@ -488,8 +491,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_nova",
-            name: $t(`sfui_wpnhud_nova`),
-            description: $t(`csgo_item_desc_nova`),
+            name: $t(`sfui_wpnhud_nova`, false, languageResource),
+            description: $t(`csgo_item_desc_nova`, false, languageResource),
             def_index: weaponIDMapping.weapon_nova,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_nova"] ??
@@ -497,8 +500,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_p250",
-            name: $t(`sfui_wpnhud_p250`),
-            description: $t(`csgo_item_desc_p250`),
+            name: $t(`sfui_wpnhud_p250`, false, languageResource),
+            description: $t(`csgo_item_desc_p250`, false, languageResource),
             def_index: weaponIDMapping.weapon_p250,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_p250"] ??
@@ -506,8 +509,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_p90",
-            name: $t(`sfui_wpnhud_p90`),
-            description: $t(`csgo_item_desc_p90`),
+            name: $t(`sfui_wpnhud_p90`, false, languageResource),
+            description: $t(`csgo_item_desc_p90`, false, languageResource),
             def_index: weaponIDMapping.weapon_p90,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_p90"] ??
@@ -515,8 +518,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_revolver",
-            name: $t(`sfui_wpnhud_revolver`),
-            description: $t(`csgo_item_desc_revolver`),
+            name: $t(`sfui_wpnhud_revolver`, false, languageResource),
+            description: $t(`csgo_item_desc_revolver`, false, languageResource),
             def_index: weaponIDMapping.weapon_revolver,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_revolver"] ??
@@ -524,8 +527,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_sawedoff",
-            name: $t(`sfui_wpnhud_sawedoff`),
-            description: $t(`csgo_item_desc_sawedoff`),
+            name: $t(`sfui_wpnhud_sawedoff`, false, languageResource),
+            description: $t(`csgo_item_desc_sawedoff`, false, languageResource),
             def_index: weaponIDMapping.weapon_sawedoff,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_sawedoff"] ??
@@ -533,8 +536,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_scar20",
-            name: $t(`sfui_wpnhud_scar20`),
-            description: $t(`csgo_item_desc_scar20`),
+            name: $t(`sfui_wpnhud_scar20`, false, languageResource),
+            description: $t(`csgo_item_desc_scar20`, false, languageResource),
             def_index: weaponIDMapping.weapon_scar20,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_scar20"] ??
@@ -542,8 +545,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_sg556",
-            name: $t(`sfui_wpnhud_sg556`),
-            description: $t(`csgo_item_desc_sg553`),
+            name: $t(`sfui_wpnhud_sg556`, false, languageResource),
+            description: $t(`csgo_item_desc_sg553`, false, languageResource),
             def_index: weaponIDMapping.weapon_sg556,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_sg556"] ??
@@ -551,8 +554,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_smokegrenade",
-            name: $t(`sfui_wpnhud_smokegrenade`),
-            description: $t(`csgo_item_desc_smokegrenade`),
+            name: $t(`sfui_wpnhud_smokegrenade`, false, languageResource),
+            description: $t(`csgo_item_desc_smokegrenade`, false, languageResource),
             def_index: weaponIDMapping.weapon_smokegrenade,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_smokegrenade"] ??
@@ -560,8 +563,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_ssg08",
-            name: $t(`sfui_wpnhud_ssg08`),
-            description: $t(`csgo_item_desc_ssg08`),
+            name: $t(`sfui_wpnhud_ssg08`, false, languageResource),
+            description: $t(`csgo_item_desc_ssg08`, false, languageResource),
             def_index: weaponIDMapping.weapon_ssg08,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_ssg08"] ??
@@ -569,8 +572,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_taser",
-            name: $t(`sfui_wpnhud_taser`),
-            description: $t(`csgo_item_desc_taser`),
+            name: $t(`sfui_wpnhud_taser`, false, languageResource),
+            description: $t(`csgo_item_desc_taser`, false, languageResource),
             def_index: weaponIDMapping.weapon_taser,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_taser"] ??
@@ -578,8 +581,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_tec9",
-            name: $t(`sfui_wpnhud_tec9`),
-            description: $t(`csgo_item_desc_tec9`),
+            name: $t(`sfui_wpnhud_tec9`, false, languageResource),
+            description: $t(`csgo_item_desc_tec9`, false, languageResource),
             def_index: weaponIDMapping.weapon_tec9,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_tec9"] ??
@@ -587,8 +590,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_ump45",
-            name: $t(`sfui_wpnhud_ump45`),
-            description: $t(`csgo_item_desc_ump45`),
+            name: $t(`sfui_wpnhud_ump45`, false, languageResource),
+            description: $t(`csgo_item_desc_ump45`, false, languageResource),
             def_index: weaponIDMapping.weapon_ump45,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_ump45"] ??
@@ -596,8 +599,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_usp_silencer",
-            name: $t(`sfui_wpnhud_usp_silencer`),
-            description: $t(`csgo_item_desc_usp_silencer`),
+            name: $t(`sfui_wpnhud_usp_silencer`, false, languageResource),
+            description: $t(`csgo_item_desc_usp_silencer`, false, languageResource),
             def_index: weaponIDMapping.weapon_usp_silencer,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_usp_silencer"] ??
@@ -605,8 +608,8 @@ export function getBaseWeapons() {
         },
         {
             id: "base_weapon-weapon_xm1014",
-            name: $t(`sfui_wpnhud_xm1014`),
-            description: $t(`csgo_item_desc_xm1014`),
+            name: $t(`sfui_wpnhud_xm1014`, false, languageResource),
+            description: $t(`csgo_item_desc_xm1014`, false, languageResource),
             def_index: weaponIDMapping.weapon_xm1014,
             image:
                 cdnImages["econ/weapons/base_weapons/weapon_xm1014"] ??
@@ -614,5 +617,5 @@ export function getBaseWeapons() {
         },
     ].sort((a, b) => a.def_index - b.def_index);
 
-    saveDataJson(`./public/api/${folder}/base_weapons.json`, baseWeapons);
+    return baseWeapons;
 }

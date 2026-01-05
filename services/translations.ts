@@ -3,8 +3,6 @@ import axios from "axios";
 import type { CustomTranslation } from "../types";
 import customTranslations from "../utils/translations.json" with { type: "json" };
 
-export const languageData: { language: string; folder: string } | null = null;
-
 export type LanguageResource = {
     default: Record<string, string>;
     default_idx: string[];
@@ -49,7 +47,11 @@ export function $tTag(key: string, useDefault = false, languageResource: Languag
     return null;
 }
 
-export function $tc(key: string, data: Record<string, string> = {}, language: CustomTranslation) {
+export function $tc(
+    key: keyof (typeof customTranslations)[keyof typeof customTranslations],
+    data: Record<string, string> = {},
+    language: CustomTranslation
+) {
     const all = customTranslations[language];
 
     if (!all) {

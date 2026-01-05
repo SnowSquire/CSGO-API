@@ -1,16 +1,11 @@
 import { getImageUrl } from "../constants.js";
 import { getRarityColor } from "../utils/index.js";
-import { saveDataJson } from "../utils/saveDataJson.js";
 import specialNotes from "../utils/specialNotes.json" with { type: "json" };
-import { state } from "./main.js";
-import { $t, languageData } from "./translations.js";
 
-function isSticker(item: {
-    sticker_material: string | undefined;
-    object_id: string;
-    item_name: string;
-    name: string | string[];
-}) {
+import type { State } from "./main.js";
+import { $t, type LanguageResource } from "./translations.js";
+
+function isSticker(item: any) {
     if (item.sticker_material === undefined) {
         return false;
     }
@@ -50,8 +45,8 @@ function isSticker(item: {
     return true;
 }
 
-function getDescription() {
-    return `${$t("keychain_kc_sticker_display_case_desc")}<br><br>${$t("csgo_tool_keychain_desc")}`;
+function getDescription(languageResource: LanguageResource) {
+    return `${$t("keychain_kc_sticker_display_case_desc", false, languageResource)}<br><br>${$t("csgo_tool_keychain_desc", false, languageResource)}`;
 }
 
 function getType(item: { tournament_player_id: any; tournament_team_id: any; tournament_event_id: any }) {
@@ -70,30 +65,39 @@ function getType(item: { tournament_player_id: any; tournament_team_id: any; tou
     return "Other";
 }
 
-function getEffect(item: { item_name: any }) {
-    if ($t(item.item_name, true).includes("(Holo)") || $t(item.item_name, true).includes("(Holo, ")) {
+function getEffect(item: { item_name: any }, languageResource: LanguageResource) {
+    if (
+        $t(item.item_name, true, languageResource).includes("(Holo)") ||
+        $t(item.item_name, true, languageResource).includes("(Holo, ")
+    ) {
         return "Holo";
     }
 
-    if ($t(item.item_name, true).includes("(Foil)")) {
+    if ($t(item.item_name, true, languageResource).includes("(Foil)")) {
         return "Foil";
     }
 
-    if ($t(item.item_name, true).includes("(Lenticular)")) {
+    if ($t(item.item_name, true, languageResource).includes("(Lenticular)")) {
         return "Lenticular";
     }
 
-    if ($t(item.item_name, true).includes("(Glitter)") || $t(item.item_name, true).includes("(Glitter, ")) {
+    if (
+        $t(item.item_name, true, languageResource).includes("(Glitter)") ||
+        $t(item.item_name, true, languageResource).includes("(Glitter, ")
+    ) {
         return "Glitter";
     }
 
-    if ($t(item.item_name, true).includes("(Gold)") || $t(item.item_name, true).includes("(Gold, ")) {
+    if (
+        $t(item.item_name, true, languageResource).includes("(Gold)") ||
+        $t(item.item_name, true, languageResource).includes("(Gold, ")
+    ) {
         return "Gold";
     }
 
     if (
-        $t(item.item_name, true).includes("(Embroidered)") ||
-        $t(item.item_name, true).includes("(Embroidered, ")
+        $t(item.item_name, true, languageResource).includes("(Embroidered)") ||
+        $t(item.item_name, true, languageResource).includes("(Embroidered, ")
     ) {
         return "Embroidered";
     }
@@ -101,7 +105,7 @@ function getEffect(item: { item_name: any }) {
     return "Other";
 }
 
-function getMarketHashName(item) {
+function getMarketHashName(item: any, languageResource: LanguageResource) {
     // 1 - DreamHack 2013
     if (item.tournament_event_id === 1) {
         return null;
@@ -111,7 +115,7 @@ function getMarketHashName(item) {
     if (item.tournament_event_id === 3) {
         if (
             (getType(item) === "Event" && item.sticker_material.includes("gold_foil")) ||
-            (getEffect(item) === "Foil" && getType(item) === "Team")
+            (getEffect(item, languageResource) === "Foil" && getType(item) === "Team")
         ) {
             return null;
         }
@@ -119,7 +123,7 @@ function getMarketHashName(item) {
 
     // 4 - Cologne 2014
     if (item.tournament_event_id === 4) {
-        if (getEffect(item) === "Foil" || item.sticker_material === "cologne2014/esl_c") {
+        if (getEffect(item, languageResource) === "Foil" || item.sticker_material === "cologne2014/esl_c") {
             return null;
         }
     }
@@ -137,7 +141,7 @@ function getMarketHashName(item) {
     // 15 - Katowice 2019
     // 16 - Berlin 2019
     if ([5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16].includes(item.tournament_event_id)) {
-        if (item.item_rarity === "legendary" && getEffect(item) === "Gold") {
+        if (item.item_rarity === "legendary" && getEffect(item, languageResource) === "Gold") {
             return null;
         }
     }
@@ -149,10 +153,10 @@ function getMarketHashName(item) {
         return null;
     }
 
-    return `${$t("keychain_kc_sticker_display_case", true)} | ${$t(item.item_name, true)}`;
+    return `${$t("keychain_kc_sticker_display_case", true, languageResource)} | ${$t(item.item_name, true, languageResource)}`;
 }
 
-function parseItem(item) {
+function parseItem(item: any, state: State, languageResource: LanguageResource) {
     const { cratesBySkins, proTeams, proPlayers, collectionsByStickers, cdnImages } = state;
 
     const image =
@@ -166,44 +170,48 @@ function parseItem(item) {
 
     return {
         id: `sticker_slab-${item.object_id}`,
-        name: `${$t("keychain_kc_sticker_display_case")} | ${$t(item.item_name)}`,
-        description: getDescription(),
+        name: `${$t("keychain_kc_sticker_display_case", false, languageResource)} | ${$t(item.item_name, false, languageResource)}`,
+        description: getDescription(languageResource),
         def_index: item.object_id,
         rarity: item.item_rarity
             ? {
                   id: `rarity_${item.item_rarity}`,
-                  name: $t(`rarity_${item.item_rarity}`),
+                  name: $t(`rarity_${item.item_rarity}`, false, languageResource),
                   color: getRarityColor(`rarity_${item.item_rarity}`),
               }
             : {
                   id: "rarity_default",
-                  name: $t("rarity_default"),
+                  name: $t("rarity_default", false, languageResource),
                   color: getRarityColor("rarity_default"),
               },
         special_notes: specialNotes?.[`sticker-${item.object_id}`],
         crates:
-            cratesBySkins?.[`sticker-${item.object_id}`]?.map(i => ({
+            cratesBySkins?.[`sticker-${item.object_id}`]?.map((i: any) => ({
                 ...i,
-                name: $t(i.name),
+                name: $t(i.name, false, languageResource),
             })) ?? [],
         collections:
-            collectionsByStickers?.[`sticker-${item.object_id}`]?.map(i => ({
+            collectionsByStickers?.[`sticker-${item.object_id}`]?.map((i: any) => ({
                 ...i,
-                name: $t(i.name),
+                name: $t(i.name, false, languageResource),
             })) ?? [],
         type: getType(item),
-        market_hash_name: getMarketHashName(item),
-        effect: getEffect(item),
+        market_hash_name: getMarketHashName(item, languageResource),
+        effect: getEffect(item, languageResource),
         tournament: item.tournament_event_id
             ? {
                   id: item.tournament_event_id,
-                  name: $t(`csgo_tournament_event_nameshort_${item.tournament_event_id}`),
+                  name: $t(
+                      `csgo_tournament_event_nameshort_${item.tournament_event_id}`,
+                      false,
+                      languageResource
+                  ),
               }
             : undefined,
         team: proTeams[item.tournament_team_id]
             ? {
                   ...proTeams[item.tournament_team_id],
-                  name: $t(`csgo_teamid_${item.tournament_team_id}`),
+                  name: $t(`csgo_teamid_${item.tournament_team_id}`, false, languageResource),
               }
             : undefined,
         player: proPlayers[item.tournament_player_id] ?? undefined,
@@ -217,11 +225,10 @@ function parseItem(item) {
     };
 }
 
-export function getStickerSlabs() {
-    const { stickerKits } = state;
-    const { folder } = languageData;
+export function getStickerSlabs(state: State, languageResource: LanguageResource) {
+    const stickers = state.stickerKits
+        .filter(isSticker)
+        .map(item => parseItem(item, state, languageResource));
 
-    const stickers = stickerKits.filter(isSticker).map(parseItem);
-
-    saveDataJson(`./public/api/${folder}/sticker_slabs.json`, stickers);
+    return stickers;
 }

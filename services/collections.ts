@@ -1,12 +1,11 @@
 import { getImageUrl } from "../constants.js";
+import type { State } from "./main.js";
 import { getRarityColor } from "../utils/index.js";
-import { saveDataJson } from "../utils/saveDataJson.js";
-import { state } from "./main.js";
-import { $t, languageData } from "./translations.js";
+import { $t, type LanguageResource } from "./translations.js";
 
-const isCollection = item => item.is_collection !== undefined;
+const isCollection = (item: any) => item.is_collection !== undefined;
 
-function isSelfOpeningCollection(item) {
+function isSelfOpeningCollection(item: any) {
     if (item.item_name === undefined) return false;
 
     if (!item.item_name.startsWith("#CSGO_crate")) {
@@ -21,12 +20,6 @@ function isSelfOpeningCollection(item) {
         return false;
     }
 
-    // Can't really find a way to filter collections
-    // if (item.item_type === undefined) {
-    //     if (item.translation_name.includes("Collection")) {
-    //         return true;
-    //     }
-    // }
     if (item.item_type === "self_opening_purchase") {
         if (item.prefab.includes("graffiti")) {
             return true;
@@ -36,7 +29,15 @@ function isSelfOpeningCollection(item) {
     return false;
 }
 
-function parseItem(item) {
+function parseItem(
+    item: any,
+    state: {
+        skinsByCollections: State["skinsByCollections"];
+        cratesByCollections: State["cratesByCollections"];
+        cdnImages: State["cdnImages"];
+    },
+    languageResource: LanguageResource
+) {
     const { skinsByCollections, cratesByCollections, cdnImages } = state;
 
     const fileName = `${item.name.replace("#CSGO_", "")}`;
@@ -44,23 +45,27 @@ function parseItem(item) {
 
     return {
         id: `collection-${item.name.replace("#CSGO_", "").replace(/_/g, "-")}`,
-        name: item.name_force ? $t(item.name_force) : $t(item.name),
-        crates: (cratesByCollections?.[item.name.replace("#CSGO_", "")] ?? []).map(i => ({
+        name: item.name_force
+            ? $t(item.name_force, false, languageResource)
+            : $t(item.name, false, languageResource),
+        crates: (cratesByCollections?.[item.name.replace("#CSGO_", "")] ?? []).map((i: any) => ({
             ...i,
-            name: $t(i.name),
+            name: $t(i.name, false, languageResource),
         })),
-        contains: skinsByCollections?.[item.name.replace("#CSGO_", "")].map(i => ({
+        contains: (skinsByCollections?.[item.name.replace("#CSGO_", "")] ?? []).map((i: any) => ({
             ...i,
-            name: i.name instanceof Object ? `${$t(i.name.weapon)} | ${$t(i.name.pattern)}` : $t(i.name),
+            name:
+                i.name instanceof Object
+                    ? `${$t(i.name.weapon, false, languageResource)} | ${$t(i.name.pattern, false, languageResource)}`
+                    : $t(i.name, false, languageResource),
             rarity: {
                 id: i.rarity,
-                name: $t(i.rarity),
+                name: $t(i.rarity, false, languageResource),
                 color: getRarityColor(i.rarity),
             },
         })),
         image,
 
-        // Return original attributes from item_game.json
         original: {
             name: item.name,
             image_inventory: `econ/set_icons/${fileName}`,
@@ -68,7 +73,14 @@ function parseItem(item) {
     };
 }
 
-function parseItemSelfOpening(item) {
+function parseItemSelfOpening(
+    item: any,
+    state: {
+        skinsByCollections: State["skinsByCollections"];
+        cdnImages: State["cdnImages"];
+    },
+    languageResource: LanguageResource
+) {
     const { skinsByCollections, cdnImages } = state;
 
     const image =
@@ -76,20 +88,19 @@ function parseItemSelfOpening(item) {
 
     return {
         id: `collection-${item.object_id}`,
-        name: $t(item.item_name),
+        name: $t(item.item_name, false, languageResource),
         crates: [],
-        contains: (skinsByCollections?.[item.name] ?? []).map(i => ({
+        contains: (skinsByCollections?.[item.name] ?? []).map((i: any) => ({
             ...i,
-            name: $t(i.name),
+            name: $t(i.name, false, languageResource),
             rarity: {
                 id: i.rarity,
-                name: $t(i.rarity),
+                name: $t(i.rarity, false, languageResource),
                 color: getRarityColor(i.rarity),
             },
         })),
         image,
 
-        // Return original attributes from item_game.json
         original: {
             name: item.name,
             item_name: item.item_name,
@@ -98,14 +109,24 @@ function parseItemSelfOpening(item) {
     };
 }
 
-export async function getCollections() {
+export function getCollections(
+    state: {
+        items: State["items"];
+        itemSets: State["itemSets"];
+        skinsByCollections: State["skinsByCollections"];
+        cratesByCollections: State["cratesByCollections"];
+        cdnImages: State["cdnImages"];
+    },
+    languageResource: LanguageResource
+) {
     const { items, itemSets } = state;
-    const { folder } = languageData;
 
     const collections = [
-        ...itemSets.filter(isCollection).map(parseItem),
-        ...Object.values(items).filter(isSelfOpeningCollection).map(parseItemSelfOpening),
+        ...itemSets.filter(isCollection).map((item: any) => parseItem(item, state, languageResource)),
+        ...Object.values(items)
+            .filter(isSelfOpeningCollection)
+            .map((item: any) => parseItemSelfOpening(item, state, languageResource)),
     ].filter(collection => collection.name);
 
-    await saveDataJson(`./public/api/${folder}/collections.json`, collections);
+    return collections;
 }

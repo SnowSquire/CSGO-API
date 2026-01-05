@@ -1,16 +1,16 @@
 import { getImageUrl } from "../constants.js";
+import type { ProcessedStickerKit } from "../types.js";
 import { getGraffitiVariations, getRarityColor } from "../utils/index.js";
-import { saveDataJson } from "../utils/saveDataJson.js";
 import specialNotes from "../utils/specialNotes.json" with { type: "json" };
-import { state } from "./main.js";
-import { $t, languageData } from "./translations.js";
+import type { State } from "./main.js";
+import { $t, type LanguageResource } from "./translations.js";
 
-function isGraffiti(item) {
-    if (item.item_name.startsWith("#SprayKit_")) {
+function isGraffiti(item: ProcessedStickerKit) {
+    if (item.item_name?.startsWith("#SprayKit_")) {
         return true;
     }
 
-    if (item.name.includes("spray_")) {
+    if (item.name?.includes("spray_")) {
         return true;
     }
 
@@ -21,59 +21,72 @@ function isGraffiti(item) {
     return false;
 }
 
-function getDescription(item) {
-    let msg = $t("csgo_tool_spray_desc");
-    const desc = $t(item.description_string);
+function getDescription(item: ProcessedStickerKit, languageResource: LanguageResource) {
+    let msg = $t("csgo_tool_spray_desc", false, languageResource);
+    const desc = $t(item.description_string, false, languageResource);
     if (desc && desc.length > 0) {
         msg = `${msg}<br><br>${desc}`;
     }
     return msg;
 }
 
-function getMarketHashName(item, colorKey) {
+function getMarketHashName(
+    item: ProcessedStickerKit,
+    colorKey: string | null,
+    languageResource: LanguageResource
+) {
     if (colorKey) {
-        return `${$t("csgo_tool_spray", true)} | ${$t(item.item_name, true)} (${$t(colorKey, true)})`;
+        return `${$t("csgo_tool_spray", true, languageResource)} | ${$t(item.item_name!, true, languageResource)} (${$t(colorKey, true, languageResource)})`;
     }
     // The only sealed graffiti that has a market hash name are the
     // ones from: Atlanta 2017, Krakow 2017,  Boston 2018, London 2018.
     if (item.tournament_event_id && ![11, 12, 13, 14].includes(item.tournament_event_id)) {
         return null;
     }
-    return `${$t("csgo_tool_spray", true)} | ${$t(item.item_name, true)}`;
+    return `${$t("csgo_tool_spray", true, languageResource)} | ${$t(item.item_name!, true, languageResource)}`;
 }
 
-function parseItemSealedGraffiti(item) {
+function parseItemSealedGraffiti(
+    item: ProcessedStickerKit,
+    state: {
+        cratesBySkins: State["cratesBySkins"];
+        cdnImages: State["cdnImages"];
+    },
+    languageResource: LanguageResource
+) {
     const { cratesBySkins, cdnImages } = state;
     const image =
         cdnImages[`econ/stickers/${item.sticker_material}`] ??
         getImageUrl(`econ/stickers/${item.sticker_material}`);
 
     // TODO: work in progress
-    const variations = getGraffitiVariations(item.name);
+    const variations = getGraffitiVariations(item.name as string);
     const variationsIndex =
         variations[0] === 0 ? Array.from({ length: 19 }, (_, index) => index + 1) : variations;
 
     if (variationsIndex.length > 0) {
-        return variationsIndex.map(index => {
+        return variationsIndex.map((index: number) => {
             const colorKey = `attrib_spraytintvalue_${index}`;
             return {
                 id: `graffiti-${item.object_id}_${index}`,
-                name: `${$t("csgo_tool_spray")} | ${$t(item.item_name)} (${$t(colorKey)})`,
-                description: getDescription(item),
+                name: `${$t("csgo_tool_spray", false, languageResource)} | ${$t(item.item_name!, false, languageResource)} (${$t(colorKey, false, languageResource)})`,
+                description: getDescription(item, languageResource),
                 def_index: item.object_id,
                 color_index: index,
                 rarity: {
                     id: `rarity_${item.item_rarity}`,
-                    name: $t(`rarity_${item.item_rarity}`),
+                    name: $t(`rarity_${item.item_rarity}`, false, languageResource),
                     color: getRarityColor(`rarity_${item.item_rarity}`),
                 },
-                special_notes: specialNotes?.[`graffiti-${item.object_id}`],
+                special_notes: specialNotes?.[`graffiti-${item.object_id}` as keyof typeof specialNotes],
                 crates:
-                    cratesBySkins?.[`graffiti-${item.object_id}`]?.map(i => ({
-                        ...i,
-                        name: $t(i.name),
-                    })) ?? [],
-                market_hash_name: getMarketHashName(item, colorKey),
+                    cratesBySkins?.[`graffiti-${item.object_id}` as keyof typeof cratesBySkins]?.map(
+                        (i: any) => ({
+                            ...i,
+                            name: $t(i.name, false, languageResource),
+                        })
+                    ) ?? [],
+                market_hash_name: getMarketHashName(item, colorKey, languageResource),
                 image:
                     cdnImages[`econ/stickers/${item.sticker_material}_${index}`] ??
                     getImageUrl(`econ/stickers/${item.sticker_material}_${index}`),
@@ -89,21 +102,21 @@ function parseItemSealedGraffiti(item) {
 
     return {
         id: `graffiti-${item.object_id}`,
-        name: `${$t("csgo_tool_spray")} | ${$t(item.item_name)}`,
-        description: getDescription(item),
+        name: `${$t("csgo_tool_spray", false, languageResource)} | ${$t(item.item_name!, false, languageResource)}`,
+        description: getDescription(item, languageResource),
         def_index: item.object_id,
         rarity: {
             id: `rarity_${item.item_rarity}`,
-            name: $t(`rarity_${item.item_rarity}`),
+            name: $t(`rarity_${item.item_rarity}`, false, languageResource),
             color: getRarityColor(`rarity_${item.item_rarity}`),
         },
-        special_notes: specialNotes?.[`graffiti-${item.object_id}`],
+        special_notes: specialNotes?.[`graffiti-${item.object_id}` as keyof typeof specialNotes],
         crates:
-            cratesBySkins?.[`graffiti-${item.object_id}`]?.map(i => ({
+            cratesBySkins?.[`graffiti-${item.object_id}` as keyof typeof cratesBySkins]?.map((i: any) => ({
                 ...i,
-                name: $t(i.name),
+                name: $t(i.name, false, languageResource),
             })) ?? [],
-        market_hash_name: getMarketHashName(item),
+        market_hash_name: getMarketHashName(item, null, languageResource),
         image,
 
         // Return original attributes from item_game.json
@@ -114,14 +127,20 @@ function parseItemSealedGraffiti(item) {
     };
 }
 
-export function getGraffiti() {
+export function getGraffiti(
+    state: {
+        stickerKits: State["stickerKits"];
+        cratesBySkins: State["cratesBySkins"];
+        cdnImages: State["cdnImages"];
+    },
+    languageResource: LanguageResource
+) {
     const { stickerKits } = state;
-    const { folder } = languageData;
 
     const graffiti = stickerKits
         .filter(isGraffiti)
-        .map(parseItemSealedGraffiti)
+        .map(item => parseItemSealedGraffiti(item, state, languageResource))
         .flatMap(level1 => level1);
 
-    saveDataJson(`./public/api/${folder}/graffiti.json`, graffiti);
+    return graffiti;
 }

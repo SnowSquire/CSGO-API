@@ -1,14 +1,17 @@
 import { getImageUrl } from "../constants.js";
+import type { CustomTranslation, ProcessedItem, ProcessedPrefab } from "../types.js";
 import { getRarityColor } from "../utils/index.js";
-import { saveDataJson } from "../utils/saveDataJson.js";
 import specialNotes from "../utils/specialNotes.json" with { type: "json" };
-import { state } from "./main.js";
-import { $t, $tc, languageData } from "./translations.js";
+import type { State } from "./main.js";
+import { $t, $tc, type LanguageResource } from "./translations.js";
 
-function isCrate(item) {
+function isCrate(item: ProcessedItem) {
     if (item.item_name === undefined) return false;
 
-    if (item?.attributes?.["set supply crate series"]?.attribute_class === "supply_crate_series") {
+    if (
+        typeof item?.attributes?.["set supply crate series"] === "object" &&
+        item.attributes["set supply crate series"].attribute_class === "supply_crate_series"
+    ) {
         return true;
     }
 
@@ -32,14 +35,10 @@ function isCrate(item) {
         return false;
     }
 
-    // Can't really find a way to filter collections
-    // if (item.translation_name.includes("Collection")) {
-    //     return false;
-    // }
     return true;
 }
 
-function getCrateType(item) {
+function getCrateType(item: ProcessedItem) {
     if (item.prefab === "weapon_case") {
         return "Case";
     }
@@ -48,7 +47,7 @@ function getCrateType(item) {
         return "Souvenir";
     }
 
-    if (item.item_name.startsWith("#CSGO_storageunit")) {
+    if (item.item_name?.startsWith("#CSGO_storageunit")) {
         return null;
     }
 
@@ -64,14 +63,11 @@ function getCrateType(item) {
         return "Pins";
     }
 
-    // if (item.translation_description?.includes("capsule")) {
-    //     return "Sticker Capsule";
-    // }
     if (item.name.startsWith("crate_signature")) {
         return "Autograph Capsule";
     }
 
-    if (item.image_inventory.includes("patch")) {
+    if (item.image_inventory?.includes("patch")) {
         return "Patch Capsule";
     }
 
@@ -86,15 +82,14 @@ function getCrateType(item) {
     return null;
 }
 
-function getFirstSaleDate(item, prefabs) {
+function getFirstSaleDate(item: ProcessedItem, prefabs: Record<string, ProcessedPrefab>) {
     if (item.first_sale_date !== undefined) {
         return item.first_sale_date;
     }
 
     if (item.associated_items !== undefined) {
-        const id = Object.keys(item.associated_items)[0];
-
-        return state.itemsGame.items[id]?.first_sale_date;
+        const id = Object.keys(item.associated_items)[0]!;
+        return prefabs[id]?.first_sale_date;
     }
 
     if (item.prefab !== undefined) {
@@ -104,15 +99,25 @@ function getFirstSaleDate(item, prefabs) {
     return null;
 }
 
-function getMarketHashName(item) {
+function getMarketHashName(item: ProcessedItem, languageResource: LanguageResource) {
     if (["4600", "4614", "4719", "4729", "4779", "4871", "4872", "4783", "4795"].includes(item.object_id)) {
         return null;
     }
 
-    return $t(item.item_name, true).replace("Holo/Foil", "Holo-Foil");
+    return $t(item.item_name!, true, languageResource)?.replace("Holo/Foil", "Holo-Foil") ?? null;
 }
 
-function parseItem(item, prefabs) {
+function parseItem(
+    item: ProcessedItem,
+    prefabs: Record<string, ProcessedPrefab>,
+    state: {
+        skinsByCrates: State["skinsByCrates"];
+        revolvingLootLists: State["revolvingLootLists"];
+        cdnImages: State["cdnImages"];
+    },
+    languageResource: LanguageResource,
+    language: CustomTranslation
+) {
     const { skinsByCrates, revolvingLootLists, cdnImages } = state;
 
     const image =
@@ -123,77 +128,83 @@ function parseItem(item, prefabs) {
 
     const crate = {
         id: `crate-${item.object_id}`,
-        name: $t(item.item_name),
-        description: $t(item.item_description) ?? $t(item.item_description_prefab),
+        name: $t(item.item_name, false, languageResource),
+        description:
+            $t(item.item_description, false, languageResource) ??
+            $t(item.item_description_prefab, false, languageResource),
         def_index: item.object_id,
         type: getCrateType(item),
         first_sale_date: getFirstSaleDate(item, prefabs),
         rarity: {
             id: "rarity_common",
-            name: $t("rarity_common"),
+            name: $t("rarity_common", false, languageResource),
             color: getRarityColor("rarity_common"),
         },
         contains: (skinsByCrates?.[item.tags?.ItemSet?.tag_value] ?? skinsByCrates?.[keyLootList] ?? []).map(
-            i => ({
+            (i: any) => ({
                 ...i,
-                name: i.name instanceof Object ? `${$t(i.name.weapon)} | ${$t(i.name.pattern)}` : $t(i.name),
+                name:
+                    i.name instanceof Object
+                        ? `${$t(i.name.weapon, false, languageResource)} | ${$t(i.name.pattern, false, languageResource)}`
+                        : $t(i.name, false, languageResource),
                 rarity: {
                     id: i.rarity,
-                    name: $t(i.rarity),
+                    name: $t(i.rarity, false, languageResource),
                     color: getRarityColor(i.rarity),
                 },
             })
         ),
-        contains_rare: (skinsByCrates?.[`rare--${keyLootList}`] ?? []).map(i => ({
+        contains_rare: (skinsByCrates?.[`rare--${keyLootList}`] ?? []).map((i: any) => ({
             ...i,
-            name: $tc(i.name?.tKey ?? JSON.stringify(i.name), {
-                item_name: $t(i.name.weapon),
-                pattern: $t(i.name.pattern),
-            }),
+            name: $tc(
+                i.name?.tKey ?? JSON.stringify(i.name),
+                {
+                    item_name: $t(i.name.weapon, false, languageResource) ?? "",
+                    pattern: $t(i.name.pattern, false, languageResource) ?? "",
+                },
+                language
+            ),
             rarity: {
                 id: i.rarity,
-                name: $t(i.rarity),
+                name: $t(i.rarity, false, languageResource),
                 color: getRarityColor(i.rarity),
             },
         })),
         special_notes: specialNotes?.[`crate-${item.object_id}`],
-        market_hash_name: getMarketHashName(item),
+        market_hash_name: getMarketHashName(item, languageResource),
         rental: !!item.attributes["can open for rental"],
         image,
         model_player: item.model_player ?? null,
         loot_list: item.loot_list_rare_item_name
             ? {
-                  name: $t(item.loot_list_rare_item_name),
-                  footer: $t(item.loot_list_rare_item_footer),
-                  // The crates without image_unusual_item are the ones with gloves, this might not work in the future
+                  name: $t(item.loot_list_rare_item_name, false, languageResource),
+                  footer: $t(item.loot_list_rare_item_footer, false, languageResource),
                   image: item.image_unusual_item
                       ? getImageUrl(item.image_unusual_item)
                       : getImageUrl("econ/weapon_cases/default_rare_item"),
               }
             : null,
 
-        // Return original attributes from item_game.json
         original: {
             item_name: item.item_name,
             image_inventory: item.image_inventory.toLowerCase(),
         },
     };
 
-    // Souvenir Highlight Package
-    if ($t(`${item.item_name}^highlight`)) {
+    if ($t(`${item.item_name}^highlight`, false, languageResource)) {
         return [
             crate,
             {
                 ...crate,
                 id: `crate-${item.object_id}_highlight`,
-                name: $t(`${item.item_name}^highlight`),
+                name: $t(`${item.item_name}^highlight`, false, languageResource),
                 rarity: {
                     id: "rarity_common_highlight",
-                    name: `${$t("highlight")} ${$t("rarity_common")}`,
-                    color: "#ffd7aa", // Highlight Base Grade Container
+                    name: `${$t("highlight", false, languageResource)} ${$t("rarity_common", false, languageResource)}`,
+                    color: "#ffd7aa",
                 },
                 type: "Souvenir Highlight",
-                market_hash_name: $t(`${item.item_name}^highlight`, true),
+                market_hash_name: $t(`${item.item_name}^highlight`, true, languageResource),
             },
         ];
     }
@@ -201,14 +212,23 @@ function parseItem(item, prefabs) {
     return crate;
 }
 
-export async function getCrates() {
+export function getCrates(
+    state: {
+        items: State["items"];
+        prefabs: State["prefabs"];
+        skinsByCrates: State["skinsByCrates"];
+        revolvingLootLists: State["revolvingLootLists"];
+        cdnImages: State["cdnImages"];
+    },
+    languageResource: LanguageResource,
+    language: CustomTranslation
+) {
     const { items, prefabs } = state;
-    const { folder } = languageData;
 
     const crates = Object.values(items)
         .filter(isCrate)
-        .flatMap(item => parseItem(item, prefabs))
-        .filter(crate => crate.name);
+        .flatMap(item => parseItem(item, prefabs, state, languageResource, language))
+        .filter((crate: any) => crate.name);
 
-    await saveDataJson(`./public/api/${folder}/crates.json`, crates);
+    return crates;
 }

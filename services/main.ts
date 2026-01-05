@@ -6,8 +6,7 @@ import {
     type CollectionInfo,
     type CrateInfo,
     type ItemStringThingy,
-    type ItemsGame,
-    ItemsGame as ItemsGameSchema,
+    ItemsGame,
     type ProcessedHighlightReel,
     type ProcessedItem,
     type ProcessedKeychainDefinition,
@@ -61,8 +60,6 @@ export type State = {
     cdnImages: Record<string, string>;
 };
 
-export let state: State | null = null;
-
 // Context object passed to functions that need multiple state properties
 type GetItemFromKeyContext = {
     items: Record<string, ProcessedItem>;
@@ -78,7 +75,7 @@ type GetItemFromKeyContext = {
 export async function loadItemsGame(): Promise<ItemsGame> {
     const response = await fetch(ITEMS_GAME_URL);
     const data = await response.json();
-    const typedData = type({ items_game: ItemsGameSchema })(data);
+    const typedData = type({ items_game: ItemsGame })(data);
     if (typedData instanceof type.errors) {
         throw Error(typedData.summary);
     }
@@ -1111,7 +1108,7 @@ export async function loadData(): Promise<State> {
     const proPlayers = loadProPlayers(itemsGame);
 
     // Assign to state
-    state = {
+    const state = {
         itemsGame,
         itemSets,
         stickerKits,

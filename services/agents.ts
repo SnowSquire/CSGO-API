@@ -1,7 +1,7 @@
 import { getImageUrl } from "../constants.js";
 import type { ProcessedItem } from "../types.js";
 import { getRarityColor } from "../utils/index.js";
-import { saveDataJson } from "../utils/saveDataJson.js";
+
 import type { State } from "./main.js";
 import { $t, type LanguageResource } from "./translations.js";
 
