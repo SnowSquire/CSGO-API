@@ -5,7 +5,7 @@ import { getRarityColor } from "../utils/index.js";
 import type { State } from "./main.js";
 import { $t, type LanguageResource } from "./translations.js";
 
-function isAgent(item: { prefab: string }) {
+function isAgent(item: ProcessedItem): boolean {
     return item.prefab === "customplayertradable";
 }
 

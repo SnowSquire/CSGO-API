@@ -5,7 +5,13 @@ import specialNotes from "../utils/specialNotes.json" with { type: "json" };
 import type { State } from "./main.js";
 import { $t, type LanguageResource } from "./translations.js";
 
-function isSticker(item: ProcessedStickerKit) {
+// Extended type for stickers with additional tournament properties
+type StickerKitWithTournament = ProcessedStickerKit & {
+    tournament_player_id?: number;
+    tournament_team_id?: number;
+};
+
+function isSticker(item: ProcessedStickerKit): boolean {
     if (item.sticker_material === undefined) {
         return false;
     }
@@ -37,12 +43,12 @@ function isSticker(item: ProcessedStickerKit) {
     return true;
 }
 
-function getDescription(item: any, languageResource: LanguageResource) {
+function getDescription(item: ProcessedStickerKit, languageResource: LanguageResource): string {
     const commemoratesText = item.tournament_event_id
         ? `<span style='color:#ffd700;'>${$t(`csgo_event_desc`, false, languageResource)?.replace("%s1", $t(`csgo_tournament_event_name_${item.tournament_event_id}`, false, languageResource) || "") || ""}</span><br/><br/> `
         : "";
 
-    const msg = $t("CSGO_Tool_Sticker_Desc", false, languageResource);
+    const msg = $t("CSGO_Tool_Sticker_Desc", false, languageResource) || "";
     const desc = $t(item.description_string, false, languageResource);
     if (desc && desc.length > 0 && item.description_string !== `#${desc}`) {
         return `${commemoratesText}${msg}<br><br>${desc}`;
@@ -50,7 +56,7 @@ function getDescription(item: any, languageResource: LanguageResource) {
     return `${commemoratesText}${msg}`;
 }
 
-function getType(item: any) {
+function getType(item: StickerKitWithTournament): string {
     if (item.tournament_player_id) {
         return "Autograph";
     }
@@ -66,7 +72,7 @@ function getType(item: any) {
     return "Other";
 }
 
-function getEffect(item: any, languageResource: LanguageResource) {
+function getEffect(item: ProcessedStickerKit, languageResource: LanguageResource): string {
     const raw = $t(item.item_name!, true, languageResource);
     if (!raw) return "Other";
 
@@ -97,7 +103,7 @@ function getEffect(item: any, languageResource: LanguageResource) {
     return "Other";
 }
 
-function getMarketHashName(item: any, languageResource: LanguageResource) {
+function getMarketHashName(item: ProcessedStickerKit, languageResource: LanguageResource): string | null {
     if (item.tournament_event_id === 1) {
         return null;
     }
@@ -117,7 +123,10 @@ function getMarketHashName(item: any, languageResource: LanguageResource) {
         }
     }
 
-    if ([5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16].includes(item.tournament_event_id)) {
+    if (
+        item.tournament_event_id &&
+        [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16].includes(item.tournament_event_id)
+    ) {
         if (item.item_rarity === "legendary" && getEffect(item, languageResource) === "Gold") {
             return null;
         }
@@ -134,7 +143,7 @@ function getMarketHashName(item: any, languageResource: LanguageResource) {
 }
 
 function parseItem(
-    item: any,
+    item: StickerKitWithTournament,
     state: {
         cratesBySkins: State["cratesBySkins"];
         proTeams: State["proTeams"];
@@ -196,13 +205,14 @@ function parseItem(
                   ),
               }
             : undefined,
-        team: proTeams[item.tournament_team_id]
-            ? {
-                  ...proTeams[item.tournament_team_id],
-                  name: $t(`csgo_teamid_${item.tournament_team_id}`, false, languageResource),
-              }
-            : undefined,
-        player: proPlayers[item.tournament_player_id] ?? undefined,
+        team:
+            item.tournament_team_id && proTeams[item.tournament_team_id]
+                ? {
+                      ...proTeams[item.tournament_team_id],
+                      name: $t(`csgo_teamid_${item.tournament_team_id}`, false, languageResource),
+                  }
+                : undefined,
+        player: item.tournament_player_id ? proPlayers[item.tournament_player_id] : undefined,
         image,
 
         original: {
@@ -227,7 +237,7 @@ export function getStickers(
 
     const stickers = stickerKits
         .filter(isSticker)
-        .map((item: any) => parseItem(item, state, languageResource));
+        .map((item: StickerKitWithTournament) => parseItem(item, state, languageResource));
 
     return stickers;
 }

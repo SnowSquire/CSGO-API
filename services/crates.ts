@@ -5,7 +5,7 @@ import specialNotes from "../utils/specialNotes.json" with { type: "json" };
 import type { State } from "./main.js";
 import { $t, $tc, type LanguageResource } from "./translations.js";
 
-function isCrate(item: ProcessedItem) {
+function isCrate(item: ProcessedItem): boolean {
     if (item.item_name === undefined) return false;
 
     if (
@@ -38,7 +38,7 @@ function isCrate(item: ProcessedItem) {
     return true;
 }
 
-function getCrateType(item: ProcessedItem) {
+function getCrateType(item: ProcessedItem): string | null {
     if (item.prefab === "weapon_case") {
         return "Case";
     }
@@ -121,17 +121,24 @@ function parseItem(
     const { skinsByCrates, revolvingLootLists, cdnImages } = state;
 
     const image =
-        cdnImages[item.image_inventory.toLowerCase()] ?? getImageUrl(item.image_inventory.toLowerCase());
+        cdnImages[item.image_inventory!.toLowerCase()] ?? getImageUrl(item.image_inventory!.toLowerCase());
     const lootListName = item?.loot_list_name ?? null;
-    const attributeValue = item.attributes?.["set supply crate series"]?.value ?? null;
-    const keyLootList = lootListName ?? revolvingLootLists[attributeValue] ?? null;
+    const attributeValue = (() => {
+        const attr = item.attributes?.["set supply crate series"];
+        if (typeof attr === "object" && attr?.value !== undefined) {
+            return attr.value;
+        }
+        return null;
+    })();
+    const keyLootList =
+        lootListName ?? (attributeValue ? revolvingLootLists[String(attributeValue)] : null) ?? null;
 
     const crate = {
         id: `crate-${item.object_id}`,
-        name: $t(item.item_name, false, languageResource),
+        name: $t(item.item_name!, false, languageResource),
         description:
-            $t(item.item_description, false, languageResource) ??
-            $t(item.item_description_prefab, false, languageResource),
+            $t(item.item_description ?? "", false, languageResource) ??
+            $t(item.item_description_prefab ?? "", false, languageResource),
         def_index: item.object_id,
         type: getCrateType(item),
         first_sale_date: getFirstSaleDate(item, prefabs),
@@ -140,21 +147,23 @@ function parseItem(
             name: $t("rarity_common", false, languageResource),
             color: getRarityColor("rarity_common"),
         },
-        contains: (skinsByCrates?.[item.tags?.ItemSet?.tag_value] ?? skinsByCrates?.[keyLootList] ?? []).map(
-            (i: any) => ({
-                ...i,
-                name:
-                    i.name instanceof Object
-                        ? `${$t(i.name.weapon, false, languageResource)} | ${$t(i.name.pattern, false, languageResource)}`
-                        : $t(i.name, false, languageResource),
-                rarity: {
-                    id: i.rarity,
-                    name: $t(i.rarity, false, languageResource),
-                    color: getRarityColor(i.rarity),
-                },
-            })
-        ),
-        contains_rare: (skinsByCrates?.[`rare--${keyLootList}`] ?? []).map((i: any) => ({
+        contains: (
+            skinsByCrates?.[item.tags?.ItemSet?.tag_value as string] ??
+            skinsByCrates?.[keyLootList as string] ??
+            []
+        ).map((i: any) => ({
+            ...i,
+            name:
+                i.name instanceof Object
+                    ? `${$t(i.name.weapon, false, languageResource)} | ${$t(i.name.pattern, false, languageResource)}`
+                    : $t(i.name, false, languageResource),
+            rarity: {
+                id: i.rarity,
+                name: $t(i.rarity, false, languageResource),
+                color: getRarityColor(i.rarity),
+            },
+        })),
+        contains_rare: (skinsByCrates?.[`rare-${keyLootList}`] ?? []).map((i: any) => ({
             ...i,
             name: $tc(
                 i.name?.tKey ?? JSON.stringify(i.name),
@@ -170,15 +179,15 @@ function parseItem(
                 color: getRarityColor(i.rarity),
             },
         })),
-        special_notes: specialNotes?.[`crate-${item.object_id}`],
+        special_notes: specialNotes?.[`crate-${item.object_id}` as keyof typeof specialNotes],
         market_hash_name: getMarketHashName(item, languageResource),
-        rental: !!item.attributes["can open for rental"],
+        rental: Boolean(item.attributes?.["can open for rental"]),
         image,
         model_player: item.model_player ?? null,
         loot_list: item.loot_list_rare_item_name
             ? {
                   name: $t(item.loot_list_rare_item_name, false, languageResource),
-                  footer: $t(item.loot_list_rare_item_footer, false, languageResource),
+                  footer: $t(item.loot_list_rare_item_footer ?? "", false, languageResource),
                   image: item.image_unusual_item
                       ? getImageUrl(item.image_unusual_item)
                       : getImageUrl("econ/weapon_cases/default_rare_item"),
@@ -186,8 +195,8 @@ function parseItem(
             : null,
 
         original: {
-            item_name: item.item_name,
-            image_inventory: item.image_inventory.toLowerCase(),
+            item_name: item.item_name!,
+            image_inventory: item.image_inventory!.toLowerCase(),
         },
     };
 

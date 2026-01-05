@@ -4,7 +4,7 @@ import { getRarityColor } from "../utils/index.js";
 import type { State } from "./main.js";
 import { $t, type LanguageResource } from "./translations.js";
 
-function isKeychain(item: ProcessedKeychainDefinition) {
+function isKeychain(item: ProcessedKeychainDefinition): boolean {
     if (!item.loc_name?.startsWith("#keychain_")) {
         return false;
     }
@@ -16,7 +16,7 @@ function isKeychain(item: ProcessedKeychainDefinition) {
     return true;
 }
 
-function getMarketHashName(item: ProcessedKeychainDefinition, languageResource: LanguageResource) {
+function getMarketHashName(item: ProcessedKeychainDefinition, languageResource: LanguageResource): string {
     return `${$t("CSGO_Tool_Keychain", true, languageResource)} | ${$t(item.loc_name!, true, languageResource)}`;
 }
 

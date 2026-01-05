@@ -21,8 +21,8 @@ function isGraffiti(item: ProcessedStickerKit) {
     return false;
 }
 
-function getDescription(item: ProcessedStickerKit, languageResource: LanguageResource) {
-    let msg = $t("csgo_tool_spray_desc", false, languageResource);
+function getDescription(item: ProcessedStickerKit, languageResource: LanguageResource): string {
+    let msg = $t("csgo_tool_spray_desc", false, languageResource) || "";
     const desc = $t(item.description_string, false, languageResource);
     if (desc && desc.length > 0) {
         msg = `${msg}<br><br>${desc}`;
@@ -34,7 +34,7 @@ function getMarketHashName(
     item: ProcessedStickerKit,
     colorKey: string | null,
     languageResource: LanguageResource
-) {
+): string | null {
     if (colorKey) {
         return `${$t("csgo_tool_spray", true, languageResource)} | ${$t(item.item_name!, true, languageResource)} (${$t(colorKey, true, languageResource)})`;
     }

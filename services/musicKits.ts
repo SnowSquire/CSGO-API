@@ -8,7 +8,7 @@ function getDescription(
     item: ProcessedMusicDefinition,
     isStattrak: boolean,
     languageResource: LanguageResource
-) {
+): string {
     const stattrakText = isStattrak
         ? `<span style='color:#99ccff;'>${$t("attrib_killeater", false, languageResource)}</span><br/><br/><span style='color:#cf6a32;'>${$t("killeaterdescriptionnotice_ocmvps", false, languageResource)}</span><br/><br/>`
         : "";

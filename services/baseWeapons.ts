@@ -3,12 +3,20 @@ import { weaponIDMapping } from "../utils/index.js";
 import type { State } from "./main.js";
 import { $t, type LanguageResource } from "./translations.js";
 
+interface BaseWeapon {
+    id: string;
+    name: string | null;
+    description: string | null;
+    def_index: string | number;
+    image: string;
+}
+
 export function getBaseWeapons(
     state: {
         cdnImages: State["cdnImages"];
     },
     languageResource: LanguageResource
-) {
+): BaseWeapon[] {
     const { cdnImages } = state;
 
     const baseWeapons = [

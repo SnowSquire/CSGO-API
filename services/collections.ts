@@ -1,11 +1,14 @@
 import { getImageUrl } from "../constants.js";
+import type { ProcessedItem } from "../types.js";
 import type { State } from "./main.js";
 import { getRarityColor } from "../utils/index.js";
 import { $t, type LanguageResource } from "./translations.js";
 
-const isCollection = (item: any) => item.is_collection !== undefined;
+type ItemSetType = State["itemSets"][number];
 
-function isSelfOpeningCollection(item: any) {
+const isCollection = (item: ItemSetType): boolean => item.is_collection !== undefined;
+
+function isSelfOpeningCollection(item: ProcessedItem): boolean {
     if (item.item_name === undefined) return false;
 
     if (!item.item_name.startsWith("#CSGO_crate")) {
@@ -30,7 +33,7 @@ function isSelfOpeningCollection(item: any) {
 }
 
 function parseItem(
-    item: any,
+    item: ItemSetType,
     state: {
         skinsByCollections: State["skinsByCollections"];
         cratesByCollections: State["cratesByCollections"];
@@ -74,7 +77,7 @@ function parseItem(
 }
 
 function parseItemSelfOpening(
-    item: any,
+    item: ProcessedItem,
     state: {
         skinsByCollections: State["skinsByCollections"];
         cdnImages: State["cdnImages"];
@@ -84,11 +87,11 @@ function parseItemSelfOpening(
     const { skinsByCollections, cdnImages } = state;
 
     const image =
-        cdnImages[item.image_inventory.toLowerCase()] ?? getImageUrl(item.image_inventory.toLowerCase());
+        cdnImages[item.image_inventory!.toLowerCase()] ?? getImageUrl(item.image_inventory!.toLowerCase());
 
     return {
         id: `collection-${item.object_id}`,
-        name: $t(item.item_name, false, languageResource),
+        name: $t(item.item_name!, false, languageResource),
         crates: [],
         contains: (skinsByCollections?.[item.name] ?? []).map((i: any) => ({
             ...i,
@@ -104,7 +107,7 @@ function parseItemSelfOpening(
         original: {
             name: item.name,
             item_name: item.item_name,
-            image_inventory: item.image_inventory.toLowerCase(),
+            image_inventory: item.image_inventory!.toLowerCase(),
         },
     };
 }

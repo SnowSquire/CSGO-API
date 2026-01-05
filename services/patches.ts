@@ -4,7 +4,7 @@ import { getRarityColor } from "../utils/index.js";
 import type { State } from "./main.js";
 import { $t, type LanguageResource } from "./translations.js";
 
-function isPatch(item: ProcessedStickerKit) {
+function isPatch(item: ProcessedStickerKit): boolean {
     if (item.patch_material && ["case_skillgroups/patch_legendaryeagle"].includes(item.patch_material)) {
         return false;
     }
@@ -12,8 +12,8 @@ function isPatch(item: ProcessedStickerKit) {
     return !(item.patch_material === undefined);
 }
 
-function getDescription(item: ProcessedStickerKit, languageResource: LanguageResource) {
-    let msg = $t("CSGO_Tool_Patch_Desc", false, languageResource);
+function getDescription(item: ProcessedStickerKit, languageResource: LanguageResource): string {
+    let msg = $t("CSGO_Tool_Patch_Desc", false, languageResource) || "";
     const desc = $t(item.description_string, false, languageResource);
     if (desc && desc.length > 0) {
         msg = `${msg}<br><br>${desc}`;

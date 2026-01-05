@@ -3,7 +3,7 @@ import type { ProcessedItem } from "../types.js";
 import type { State } from "./main.js";
 import { $t, type LanguageResource } from "./translations.js";
 
-function isKey(item: ProcessedItem) {
+function isKey(item: ProcessedItem): boolean {
     if (item.item_name === undefined) {
         return false;
     }
@@ -24,7 +24,7 @@ function isKey(item: ProcessedItem) {
 }
 
 function parseItem(
-    item: ProcessedItem | any,
+    item: ProcessedItem,
     state: { items: State["items"]; cdnImages: State["cdnImages"] },
     languageResource: LanguageResource
 ) {
@@ -80,8 +80,8 @@ function parseItem(
         id: `key-${item.object_id}`,
         name: $t(item.item_name!, false, languageResource),
         description:
-            $t(item.item_description, false, languageResource) ??
-            $t(item.item_description_prefab, false, languageResource),
+            $t(item.item_description ?? "", false, languageResource) ??
+            $t(item.item_description_prefab ?? "", false, languageResource),
         def_index: item.object_id,
         crates,
         market_hash_name: marketable.includes(item.item_name!)

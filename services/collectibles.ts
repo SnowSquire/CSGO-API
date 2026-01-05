@@ -5,7 +5,7 @@ import { getCollectibleRarity, getRarityColor } from "../utils/index.js";
 import type { State } from "./main.js";
 import { $t, $tc, type LanguageResource } from "./translations.js";
 
-function isCollectible(item: ProcessedItem) {
+function isCollectible(item: ProcessedItem): boolean {
     if (item.item_name === undefined) return false;
 
     if (item.item_name.startsWith("#CSGO_Collectible")) {
@@ -23,7 +23,7 @@ function isCollectible(item: ProcessedItem) {
     return false;
 }
 
-function getType(collectible: ProcessedItem) {
+function getType(collectible: ProcessedItem): string | null {
     if (collectible.image_inventory?.includes("service_medal")) {
         return "Service Medal";
     }
@@ -82,7 +82,7 @@ function getType(collectible: ProcessedItem) {
     return null;
 }
 
-function getMarketHashName(item: ProcessedItem, languageResource: LanguageResource) {
+function getMarketHashName(item: ProcessedItem, languageResource: LanguageResource): string | null {
     const isAttendance = item.prefab === "attendance_pin";
     const isCannotTrade = item.attributes?.["cannot trade"];
 

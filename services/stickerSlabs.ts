@@ -1,11 +1,18 @@
 import { getImageUrl } from "../constants.js";
+import type { ProcessedStickerKit } from "../types.js";
 import { getRarityColor } from "../utils/index.js";
 import specialNotes from "../utils/specialNotes.json" with { type: "json" };
 
 import type { State } from "./main.js";
 import { $t, type LanguageResource } from "./translations.js";
 
-function isSticker(item: any) {
+// Extended type for sticker slabs with additional tournament properties
+type StickerKitWithTournament = ProcessedStickerKit & {
+    tournament_player_id?: number;
+    tournament_team_id?: number;
+};
+
+function isSticker(item: ProcessedStickerKit): boolean {
     if (item.sticker_material === undefined) {
         return false;
     }
@@ -45,11 +52,11 @@ function isSticker(item: any) {
     return true;
 }
 
-function getDescription(languageResource: LanguageResource) {
-    return `${$t("keychain_kc_sticker_display_case_desc", false, languageResource)}<br><br>${$t("csgo_tool_keychain_desc", false, languageResource)}`;
+function getDescription(languageResource: LanguageResource): string {
+    return `${$t("keychain_kc_sticker_display_case_desc", false, languageResource) || ""}<br><br>${$t("csgo_tool_keychain_desc", false, languageResource) || ""}`;
 }
 
-function getType(item: { tournament_player_id: any; tournament_team_id: any; tournament_event_id: any }) {
+function getType(item: StickerKitWithTournament): string {
     if (item.tournament_player_id) {
         return "Autograph";
     }
@@ -65,47 +72,39 @@ function getType(item: { tournament_player_id: any; tournament_team_id: any; tou
     return "Other";
 }
 
-function getEffect(item: { item_name: any }, languageResource: LanguageResource) {
-    if (
-        $t(item.item_name, true, languageResource).includes("(Holo)") ||
-        $t(item.item_name, true, languageResource).includes("(Holo, ")
-    ) {
+function getEffect(item: { item_name: string | null }, languageResource: LanguageResource): string {
+    const itemName = $t(item.item_name ?? "", true, languageResource) || "";
+    if (itemName.includes("(Holo)") || itemName.includes("(Holo, ")) {
         return "Holo";
     }
 
-    if ($t(item.item_name, true, languageResource).includes("(Foil)")) {
+    if (itemName.includes("(Foil)")) {
         return "Foil";
     }
 
-    if ($t(item.item_name, true, languageResource).includes("(Lenticular)")) {
+    if (itemName.includes("(Lenticular)")) {
         return "Lenticular";
     }
 
-    if (
-        $t(item.item_name, true, languageResource).includes("(Glitter)") ||
-        $t(item.item_name, true, languageResource).includes("(Glitter, ")
-    ) {
+    if (itemName.includes("(Glitter)") || itemName.includes("(Glitter, ")) {
         return "Glitter";
     }
 
-    if (
-        $t(item.item_name, true, languageResource).includes("(Gold)") ||
-        $t(item.item_name, true, languageResource).includes("(Gold, ")
-    ) {
+    if (itemName.includes("(Gold)") || itemName.includes("(Gold, ")) {
         return "Gold";
     }
 
-    if (
-        $t(item.item_name, true, languageResource).includes("(Embroidered)") ||
-        $t(item.item_name, true, languageResource).includes("(Embroidered, ")
-    ) {
+    if (itemName.includes("(Embroidered)") || itemName.includes("(Embroidered, ")) {
         return "Embroidered";
     }
 
     return "Other";
 }
 
-function getMarketHashName(item: any, languageResource: LanguageResource) {
+function getMarketHashName(
+    item: StickerKitWithTournament,
+    languageResource: LanguageResource
+): string | null {
     // 1 - DreamHack 2013
     if (item.tournament_event_id === 1) {
         return null;
@@ -114,7 +113,7 @@ function getMarketHashName(item: any, languageResource: LanguageResource) {
     // 3 - Katowice 2014
     if (item.tournament_event_id === 3) {
         if (
-            (getType(item) === "Event" && item.sticker_material.includes("gold_foil")) ||
+            (getType(item) === "Event" && item.sticker_material?.includes("gold_foil")) ||
             (getEffect(item, languageResource) === "Foil" && getType(item) === "Team")
         ) {
             return null;
@@ -140,15 +139,18 @@ function getMarketHashName(item: any, languageResource: LanguageResource) {
     // 14 - London 2018
     // 15 - Katowice 2019
     // 16 - Berlin 2019
-    if ([5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16].includes(item.tournament_event_id)) {
+    if (
+        item.tournament_event_id &&
+        [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16].includes(item.tournament_event_id)
+    ) {
         if (item.item_rarity === "legendary" && getEffect(item, languageResource) === "Gold") {
             return null;
         }
     }
 
     if (
-        item.sticker_material.startsWith("tournament_assets/") ||
-        item.sticker_material.startsWith("danger_zone/")
+        item.sticker_material?.startsWith("tournament_assets/") ||
+        item.sticker_material?.startsWith("danger_zone/")
     ) {
         return null;
     }
@@ -156,12 +158,13 @@ function getMarketHashName(item: any, languageResource: LanguageResource) {
     return `${$t("keychain_kc_sticker_display_case", true, languageResource)} | ${$t(item.item_name, true, languageResource)}`;
 }
 
-function parseItem(item: any, state: State, languageResource: LanguageResource) {
+function parseItem(item: StickerKitWithTournament, state: State, languageResource: LanguageResource) {
     const { cratesBySkins, proTeams, proPlayers, collectionsByStickers, cdnImages } = state;
 
+    const stickerMaterial = item.sticker_material || "";
     const image =
-        cdnImages[`econ/stickers/${item.sticker_material.toLowerCase()}_1355_37`] ??
-        getImageUrl(`econ/stickers/${item.sticker_material.toLowerCase()}_1355_37`);
+        cdnImages[`econ/stickers/${stickerMaterial.toLowerCase()}_1355_37`] ??
+        getImageUrl(`econ/stickers/${stickerMaterial.toLowerCase()}_1355_37`);
 
     // items_game.txt is named as dignitas but in translation as teamdignitas.
     if (item.item_name === "#StickerKit_dhw2014_dignitas_gold") {
@@ -184,17 +187,19 @@ function parseItem(item: any, state: State, languageResource: LanguageResource) 
                   name: $t("rarity_default", false, languageResource),
                   color: getRarityColor("rarity_default"),
               },
-        special_notes: specialNotes?.[`sticker-${item.object_id}`],
+        special_notes: specialNotes?.[`sticker-${item.object_id}` as keyof typeof specialNotes],
         crates:
-            cratesBySkins?.[`sticker-${item.object_id}`]?.map((i: any) => ({
+            cratesBySkins?.[`sticker-${item.object_id}` as keyof typeof cratesBySkins]?.map((i: any) => ({
                 ...i,
                 name: $t(i.name, false, languageResource),
             })) ?? [],
         collections:
-            collectionsByStickers?.[`sticker-${item.object_id}`]?.map((i: any) => ({
-                ...i,
-                name: $t(i.name, false, languageResource),
-            })) ?? [],
+            collectionsByStickers?.[`sticker-${item.object_id}` as keyof typeof collectionsByStickers]?.map(
+                (i: any) => ({
+                    ...i,
+                    name: $t(i.name, false, languageResource),
+                })
+            ) ?? [],
         type: getType(item),
         market_hash_name: getMarketHashName(item, languageResource),
         effect: getEffect(item, languageResource),
@@ -208,19 +213,20 @@ function parseItem(item: any, state: State, languageResource: LanguageResource) 
                   ),
               }
             : undefined,
-        team: proTeams[item.tournament_team_id]
-            ? {
-                  ...proTeams[item.tournament_team_id],
-                  name: $t(`csgo_teamid_${item.tournament_team_id}`, false, languageResource),
-              }
-            : undefined,
-        player: proPlayers[item.tournament_player_id] ?? undefined,
+        team:
+            item.tournament_team_id && proTeams[item.tournament_team_id]
+                ? {
+                      ...proTeams[item.tournament_team_id],
+                      name: $t(`csgo_teamid_${item.tournament_team_id}`, false, languageResource),
+                  }
+                : undefined,
+        player: item.tournament_player_id ? proPlayers[item.tournament_player_id] : undefined,
         image,
 
         // Return original attributes from item_game.json
         original: {
             name: item.name,
-            image_inventory: `econ/stickers/${item.sticker_material.toLowerCase()}_1355_37`,
+            image_inventory: `econ/stickers/${stickerMaterial.toLowerCase()}_1355_37`,
         },
     };
 }
