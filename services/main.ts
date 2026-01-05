@@ -2,7 +2,23 @@ import { regex, type } from "arktype";
 import axios from "axios";
 import sha1 from "sha1";
 import { getImageUrl, IMAGES_INVENTORY_URL, ITEMS_GAME_URL } from "../constants";
-import { type ItemStringThingy, ItemsGame } from "../types";
+import {
+    type CollectionInfo,
+    type CrateInfo,
+    type ItemStringThingy,
+    type ItemsGame,
+    ItemsGame as ItemsGameSchema,
+    type ProcessedHighlightReel,
+    type ProcessedItem,
+    type ProcessedKeychainDefinition,
+    type ProcessedMusicDefinition,
+    type ProcessedPaintKit,
+    type ProcessedPrefab,
+    type ProcessedProPlayer,
+    type ProcessedProTeam,
+    type ProcessedStickerKit,
+    type SkinItem,
+} from "../types.js";
 import {
     filterUniqueByAttribute,
     getDopplerPhase,
@@ -17,22 +33,66 @@ import { rareSpecial } from "../utils/rareSpecial";
 export const state: {
     itemsGame: ItemsGame | null;
     itemSets: Array<ItemsGame["item_sets"][string]> | null;
-    stickerKits: Array<ItemsGame["sticker_kits"][string] & { object_id: string }> | null;
-    stickerKitsObj: Record<string, ItemsGame["sticker_kits"][string]> | null;
-    players: Record<string, ItemsGame["pro_players"][string]["name"]> | null;
+    stickerKits: Array<ProcessedStickerKit> | null;
+    stickerKitsObj: Record<string, ProcessedStickerKit> | null;
+    players: Record<string, string> | null;
+    keychainDefinitions: Array<ProcessedKeychainDefinition> | null;
+    keychainDefinitionsObj: Record<string, ProcessedKeychainDefinition> | null;
+    items: Record<string, ProcessedItem> | null;
+    prefabs: Record<string, ProcessedPrefab> | null;
+    paintKits: Record<string, ProcessedPaintKit> | null;
+    musicDefinitions: Array<ProcessedMusicDefinition> | null;
+    musicDefinitionsObj: Record<string, ProcessedMusicDefinition> | null;
+    clientLootLists: ItemsGame["client_loot_lists"] | null;
+    revolvingLootLists: ItemsGame["revolving_loot_lists"] | null;
+    rarities: Record<string, { rarity: string }> | null;
+    skinsByCrates: Record<string, SkinItem[]> | null;
+    cratesBySkins: Record<string, CrateInfo[]> | null;
+    skinsByCollections: Record<string, SkinItem[]> | null;
+    cratesByCollections: Record<string, CrateInfo[]> | null;
+    collectionsBySkins: Record<string, CollectionInfo[]> | null;
+    collectionsByStickers: Record<string, CollectionInfo[]> | null;
+    souvenirSkins: Record<string, boolean> | null;
+    stattTrakSkins: Record<string, boolean> | null;
+    highlightReels: Array<ProcessedHighlightReel> | null;
+    proTeams: Record<string, ProcessedProTeam> | null;
+    proPlayers: Record<string, ProcessedProPlayer> | null;
+    cdnImages: Record<string, string> | null;
 } = {
     itemsGame: null,
     itemSets: null,
     stickerKits: null,
     stickerKitsObj: null,
     players: null,
+    keychainDefinitions: null,
+    keychainDefinitionsObj: null,
+    items: null,
+    prefabs: null,
+    paintKits: null,
+    musicDefinitions: null,
+    musicDefinitionsObj: null,
+    clientLootLists: null,
+    revolvingLootLists: null,
+    rarities: null,
+    skinsByCrates: null,
+    cratesBySkins: null,
+    skinsByCollections: null,
+    cratesByCollections: null,
+    collectionsBySkins: null,
+    collectionsByStickers: null,
+    souvenirSkins: null,
+    stattTrakSkins: null,
+    highlightReels: null,
+    proTeams: null,
+    proPlayers: null,
+    cdnImages: null,
 };
 
 export async function loadItemsGame() {
     await fetch(ITEMS_GAME_URL)
         .then(response => response.json())
         .then(data => {
-            const typedData = type({ items_game: ItemsGame })(data);
+            const typedData = type({ items_game: ItemsGameSchema })(data);
             if (typedData instanceof type.errors) {
                 throw Error(typedData.summary);
             }
@@ -47,7 +107,10 @@ export async function loadItemsGame() {
             // Elemental Craft Sticker Pack
             const sets: Record<
                 string,
-                { type: "sticker_pack_" | "keychain_pack_"; items: Record<ItemStringThingy, 1> }
+                {
+                    type: "sticker_pack_" | "keychain_pack_";
+                    items: Record<ItemStringThingy, 1>;
+                }
             > = {};
             Object.entries(state.itemsGame.client_loot_lists).forEach(([key, value]) => {
                 const match = regex("^(sticker_pack_|keychain_pack_)(.+)_(.+)$").exec(key);
@@ -79,7 +142,9 @@ export async function loadItemsGame() {
             });
         })
         .catch(error => {
-            throw new Error(`Error loading items_game.txt from ${ITEMS_GAME_URL}`, { cause: error });
+            throw new Error(`Error loading items_game.txt from ${ITEMS_GAME_URL}`, {
+                cause: error,
+            });
         });
 
     await axios
@@ -87,7 +152,7 @@ export async function loadItemsGame() {
             "https://raw.githubusercontent.com/ByMykel/counter-strike-image-tracker/refs/heads/main/static/default_generated.json"
         )
         .then(data => {
-            state.itemsGame.alternate_icons2.weapon_icons = data.data
+            state.itemsGame!.alternate_icons2.weapon_icons = data.data
                 .filter(item => {
                     // We have heavy, light and medium
                     if (!item.includes("light_png.png")) return false;
@@ -103,7 +168,9 @@ export async function loadItemsGame() {
                 }, {});
         })
         .catch(error => {
-            throw new Error(`Error formatting alternate_icons2.weapon_icons`, { cause: error });
+            throw new Error(`Error formatting alternate_icons2.weapon_icons`, {
+                cause: error,
+            });
         });
 }
 
@@ -359,40 +426,36 @@ export function loadyCratesBySkins() {
         },
     };
 
-    state.cratesBySkins = {
-        ...Object.entries(state.skinsByCrates).reduce((acc, [crateKey, itemsList]) => {
-            crateKey = crateKey.replace("rare--", "");
+    state.cratesBySkins = Object.entries(state.skinsByCrates).reduce((acc, [crateKey, itemsList]) => {
+        crateKey = crateKey.replace("rare--", "");
 
-            itemsList.forEach(item => {
-                if (!(item.id in acc)) {
-                    acc[item.id] = [];
-                }
+        itemsList.forEach(item => {
+            if (!(item.id in acc)) {
+                acc[item.id] = [];
+            }
 
-                const lootList = Object.entries(state.revolvingLootLists).find(
-                    ([id, item]) => item === crateKey
+            const lootList = Object.entries(state.revolvingLootLists).find(([id, item]) => item === crateKey);
+
+            const crateItem =
+                hardCodedCrates[crateKey] ||
+                state.items[crateKey] ||
+                Object.values(state.items).find(
+                    i => i.attributes?.["set supply crate series"]?.value == lootList?.[0]
                 );
 
-                const crateItem =
-                    hardCodedCrates[crateKey] ||
-                    state.items[crateKey] ||
-                    Object.values(state.items).find(
-                        i => i.attributes?.["set supply crate series"]?.value == lootList?.[0]
-                    );
+            if (crateItem != null) {
+                acc[item.id].push({
+                    id: `crate-${crateItem.object_id}`,
+                    name: crateItem.item_name,
+                    image:
+                        state.cdnImages[crateItem?.image_inventory?.toLowerCase()] ??
+                        getImageUrl(crateItem?.image_inventory?.toLowerCase()),
+                });
+            }
+        });
 
-                if (crateItem != null) {
-                    acc[item.id].push({
-                        id: `crate-${crateItem.object_id}`,
-                        name: crateItem.item_name,
-                        image:
-                            state.cdnImages[crateItem?.image_inventory?.toLowerCase()] ??
-                            getImageUrl(crateItem?.image_inventory?.toLowerCase()),
-                    });
-                }
-            });
-
-            return acc;
-        }, {}),
-    };
+        return acc;
+    }, {});
 }
 
 export function loadSkinsByCollections() {

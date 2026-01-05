@@ -39,6 +39,34 @@ const ItemDefinition = type({
     "flexible_loadout_slot?": "string",
     "flexible_loadout_default?": "number.integer",
     "item_shares_equip_slot?": "number.integer",
+    "item_name?": "string",
+    "item_description?": "string",
+    "item_rarity?": "string",
+    "image_inventory?": "string",
+    "model_player?": "string",
+    "first_sale_date?": "string",
+    "loot_list_name?": "string",
+    "loot_list_rare_item_name?": "string",
+    "loot_list_rare_item_footer?": "string",
+    "image_unusual_item?": "string",
+    "item_type?": "string",
+    "used_by_classes?": type.Record("string", "string | number"),
+    "attributes?": type.Record(
+        "string",
+        type("string | number").or(
+            type({
+                "attribute_class?": "string",
+                "value?": "string | number",
+            })
+        )
+    ),
+    "tags?": type.Record(
+        "string",
+        type({
+            "tag_value?": "string",
+        })
+    ),
+    "associated_items?": type.Record("string", "string | number"),
 });
 const AttributeDefinition = type({
     name: "string",
@@ -54,7 +82,9 @@ const StickerKitDefinition = type({
     item_name: "string",
     description_string: "string",
     "sticker_material?": "string",
+    "patch_material?": "string",
     "tournament_event_id?": "number.integer",
+    "item_rarity?": "string",
 });
 const PaintKitDefinition = type({
     name: "string",
@@ -67,6 +97,36 @@ const PaintKitDefinition = type({
     "wear_remap_max?": "0 <= number <= 1",
     "seed?": "number.integer",
     "style?": "number.integer",
+    "use_legacy_model?": "0 | 1",
+});
+
+const MusicDefinition = type({
+    name: "string",
+    loc_name: "string",
+    loc_description: "string",
+    image_inventory: "string",
+});
+
+const KeychainDefinition = type({
+    name: "string",
+    loc_name: "string",
+    "loc_description?": "string",
+    image_inventory: "string",
+    "item_rarity?": "string",
+    "is commodity?": "number.integer",
+});
+
+const PrefabDefinition = type({
+    "item_name?": "string",
+    "item_description?": "string",
+    "first_sale_date?": "string | null",
+    "prefab?": "string",
+    "used_by_classes?": type.Record("string", "string | number"),
+});
+
+const ProTeamDefinition = type({
+    tag: "string",
+    "geo?": "string",
 });
 
 const ClientLootList = type({
@@ -123,6 +183,10 @@ const ProPlayerDefinition = type({
     events: type.Record("string.integer", EventDefinition),
 });
 
+const WeaponIconDefinition = type({
+    icon_path: "string",
+});
+
 export const ItemsGame = type({
     game_info: {
         first_valid_class: "number.integer >= 0",
@@ -138,8 +202,11 @@ export const ItemsGame = type({
     colors: type.Record("string", ColorDefinition),
     graffiti_tints: type.Record("string", GraffitiTintDefinition),
     player_loadout_slots: type.Record("string.integer", "string"),
-    alternate_icons2: type({ casket_icons: type.Record("string.integer", { icon_path: "string" }) }),
-    prefabs: "unknown",
+    alternate_icons2: type({
+        casket_icons: type.Record("string.integer", { icon_path: "string" }),
+        "weapon_icons?": type.Record("string", WeaponIconDefinition),
+    }),
+    prefabs: type.Record("string", PrefabDefinition),
     items: type.Record("string.integer", ItemDefinition),
     attributes: type.Record("string.integer", AttributeDefinition),
     sticker_kits: type.Record("string.integer", StickerKitDefinition),
@@ -150,11 +217,11 @@ export const ItemsGame = type({
     ),
     item_sets: type.Record("string", ItemSetDefinition),
     client_loot_lists: type.Record("string", ClientLootList),
-    revolving_loot_lists: "unknown",
+    revolving_loot_lists: type.Record("string.integer", "string"),
     quest_reward_loot_lists: "unknown",
     item_levels: "unknown",
     kill_eater_score_types: "unknown",
-    music_definitions: "unknown",
+    music_definitions: type.Record("string.integer", MusicDefinition),
     quest_definitions: "unknown",
     recurring_mission_periods: "unknown",
     campaign_definitions: "unknown",
@@ -164,8 +231,113 @@ export const ItemsGame = type({
     seasonaloperations: "unknown",
     pro_event_results: "unknown",
     pro_players: type.Record("string.integer", ProPlayerDefinition),
-    pro_teams: "unknown",
+    pro_teams: type.Record("string.integer", ProTeamDefinition),
     items_game_live: "unknown",
-    keychain_definitions: "unknown",
+    keychain_definitions: type.Record("string.integer", KeychainDefinition),
     highlight_reels: type.Record("string.integer", HighlightReelDefinition),
 });
+
+// Types for processed/computed state properties
+export type ProcessedItem = {
+    object_id: string;
+    name: string;
+    prefab: string;
+    item_name?: string;
+    item_description?: string;
+    item_rarity?: string;
+    item_name_prefab?: string;
+    item_description_prefab?: string;
+    image_inventory?: string;
+    model_player?: string;
+    first_sale_date?: string;
+    loot_list_name?: string;
+    loot_list_rare_item_name?: string;
+    loot_list_rare_item_footer?: string;
+    image_unusual_item?: string;
+    item_type?: string;
+    used_by_classes?: Record<string, string | number>;
+    attributes?: Record<string, string | number | { attribute_class?: string; value?: string | number }>;
+    tags?: Record<string, { tag_value?: string }>;
+    associated_items?: Record<string, string | number>;
+};
+
+export type ProcessedPrefab = {
+    item_name?: string;
+    item_description?: string;
+    first_sale_date?: string | null;
+    prefab?: string;
+    used_by_classes?: Record<string, string | number>;
+};
+
+export type ProcessedPaintKit = {
+    description_tag: string;
+    wear_remap_min: number;
+    wear_remap_max: number;
+    paint_index: string;
+    style_id: number;
+    style_name: string;
+    legacy_model: boolean;
+};
+
+export type ProcessedStickerKit = ItemsGame["sticker_kits"][string] & {
+    object_id: string;
+};
+
+export type ProcessedMusicDefinition = ItemsGame["music_definitions"][string] & {
+    object_id: string;
+    coupon_name: string;
+};
+
+export type ProcessedKeychainDefinition = ItemsGame["keychain_definitions"][string] & {
+    object_id: string;
+};
+
+export type SkinItem = {
+    id: string;
+    name: string | { tKey?: string; weapon: string; pattern?: string };
+    rarity: string;
+    paint_index?: string | null;
+    phase?: string | null;
+    image: string;
+};
+
+export type CrateInfo = {
+    id: string;
+    name: string;
+    image: string;
+};
+
+export type CollectionInfo = {
+    id: string;
+    name: string;
+    image: string;
+};
+
+export type ProcessedHighlightReel = {
+    id: string;
+    highlight_reel: string;
+    tournament_event_id: number;
+    tournament_event_team0_id: number;
+    tournament_event_team1_id: number;
+    tournament_event_stage_id: number;
+    tournament_event_map: string;
+    tournament_player: string | null;
+    image: string;
+    image_inventory: string;
+    video: string;
+    thumbnail: string;
+};
+
+export type ProcessedProTeam = {
+    id: number;
+    tag: string;
+    geo: string;
+};
+
+export type ProcessedProPlayer = {
+    id: number;
+    name: string;
+    code: string;
+    dob: string;
+    geo: string;
+};
