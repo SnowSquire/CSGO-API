@@ -341,3 +341,6 @@ export type ProcessedProPlayer = {
     dob: string;
     geo: string;
 };
+
+import customTranslations from "./utils/translations.json" with { type: "json" };
+export type CustomTranslation = keyof typeof customTranslations;

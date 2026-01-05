@@ -18,6 +18,8 @@ export const CSGO_ENGLISH_URL =
 export const IMAGES_INVENTORY_URL =
     "https://raw.githubusercontent.com/ByMykel/counter-strike-image-tracker/main/static/images.json";
 
+export const DEFAULT_LANGUAGE = "english";
+
 export const LANGUAGES_URL = [
     {
         language: "english",
