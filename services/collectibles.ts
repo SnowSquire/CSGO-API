@@ -130,7 +130,7 @@ function parseItem(
             ? $t(item.item_description, false, languageResource)
             : item.item_description_prefab
               ? $t(item.item_description_prefab, false, languageResource)
-              : null,
+              : "", // match behavior of old version
         def_index: item.object_id,
         rarity: {
             id: rarity,

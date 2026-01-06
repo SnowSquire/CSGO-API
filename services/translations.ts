@@ -11,14 +11,13 @@ export type LanguageResource = {
 };
 
 export function $t(key: string, useDefault = false, languageResource: LanguageResource) {
-    if (key == null) debugger;
     key = key.replace("#", "").toLowerCase();
 
     if (useDefault) {
-        return languageResource.default[key] ?? null;
+        return languageResource.default[key] || null;
     }
 
-    return languageResource.selected[key] ?? languageResource.default[key] ?? null;
+    return languageResource.selected[key] || languageResource.default[key] || null;
 }
 
 export function $tTag(key: string, useDefault = false, languageResource: LanguageResource) {
@@ -65,14 +64,14 @@ export function $tc(
         throw new Error(`key '${key}' does not exist in '${language}' translations`);
     }
 
-    const replaced = specific.replace(/\{.*?\}/g, (match: string) => {
+    const replaced = specific.replace(/\{.*?\}/g, match => {
         const key = match.replace("{", "").replace("}", "");
 
         if (!(key in data)) {
             throw new Error(`$tc data key {${key}} not provided`);
         }
 
-        return data[key];
+        return data[key]!;
     });
 
     return replaced;

@@ -38,9 +38,10 @@ function getSkinInfo(iconPath: string): [string, string] {
     const regexSkinId = /econ\/default_generated\/(.*?)_light$/i;
     const path = iconPath.toLowerCase();
     const skinId = path.match(regexSkinId);
-
-    const weapon = getWeaponName(skinId![1]);
-    const pattern = getPatternName(weapon, skinId![1]);
+    if (!skinId) throw Error("Unable to parse skin icon path");
+    const weapon = getWeaponName(skinId[1]!);
+    if (!weapon) throw Error("Unable to determine weapon from skin icon path");
+    const pattern = getPatternName(weapon, skinId[1]!);
 
     return [weapon, pattern];
 }
@@ -80,21 +81,23 @@ function parseItem(
     languageResource: LanguageResource,
     language: CustomTranslation
 ) {
+    if (item.object_id === "fdaa4d4bbf34") {
+        debugger;
+    }
     const { rarities, paintKits, cratesBySkins, souvenirSkins, collectionsBySkins, cdnImages } = state;
     const [weapon, pattern] = getSkinInfo(item.icon_path);
     const dopplerPhase = getDopplerPhase(paintKits[pattern]?.paint_index);
     const image =
-        state.cdnImages[`${item.icon_path.toLowerCase()}`] ??
-        state.cdnImages[`${item.icon_path.toLowerCase().replace(/_light$/, "_medium")}`] ??
-        state.cdnImages[`${item.icon_path.toLowerCase().replace(/_light$/, "_heavy")}`] ??
+        cdnImages[`${item.icon_path.toLowerCase()}`] ??
+        cdnImages[`${item.icon_path.toLowerCase().replace(/_light$/, "_medium")}`] ??
+        cdnImages[`${item.icon_path.toLowerCase().replace(/_light$/, "_heavy")}`] ??
         getImageUrl(`${item.icon_path.toLowerCase()}`);
     const translatedName = !isNotWeapon(weapon)
-        ? ($t(items[weapon].item_name_prefab || "", false, languageResource) ?? "")
-        : ($t(items[weapon].item_name || "", false, languageResource) ?? "");
+        ? ($t(items[weapon]!.item_name_prefab || "", false, languageResource) ?? "")
+        : ($t(items[weapon]!.item_name || "", false, languageResource) ?? "");
     const translatedDescription = !isNotWeapon(weapon)
-        ? $t(items[weapon].item_description_prefab || "", false, languageResource)
-        : $t(items[weapon].item_description || "", false, languageResource);
-
+        ? $t(items[weapon]!.item_description_prefab || "", false, languageResource)
+        : $t(items[weapon]!.item_description || "", false, languageResource);
     const isStatTrak =
         weapon.includes("knife") ||
         weapon.includes("bayonet") ||
@@ -113,22 +116,23 @@ function parseItem(
             `rarity_ancient`;
 
     const team =
-        !items[weapon].used_by_classes || Object.keys(items[weapon].used_by_classes).length === 2
+        !items[weapon]!.used_by_classes || Object.keys(items[weapon]!.used_by_classes).length === 2
             ? "both"
-            : (Object.keys(items[weapon].used_by_classes)[0] as string);
+            : (Object.keys(items[weapon]!.used_by_classes)[0] as string);
 
     return {
         id: `skin-${item.object_id}`,
+
         name: isNotWeapon(weapon)
             ? $tc(
                   "rare_special",
                   {
                       item_name: translatedName,
-                      pattern: $t(paintKits[pattern]?.description_tag || "", false, languageResource) ?? "",
+                      pattern: $t(paintKits[pattern]?.description_tag ?? "", false, languageResource) || null,
                   },
                   language
               )
-            : `${translatedName} | ${$t(paintKits[pattern]?.description_tag || "", false, languageResource)}`,
+            : `${translatedName} | ${$t(paintKits[pattern]?.description_tag ?? "", false, languageResource)}`,
         description: getDescription(translatedDescription, paintKits, pattern, languageResource),
         weapon: {
             id: weapon,
@@ -137,7 +141,7 @@ function parseItem(
         },
         category: {
             id: getCategory(weapon),
-            name: $t(getCategory(weapon), false, languageResource) ?? "",
+            name: $t(getCategory(weapon)!, false, languageResource) ?? "",
         },
         pattern: {
             id: pattern,
@@ -187,7 +191,7 @@ function parseItem(
 
         // Return original attributes from item_game.json
         original: {
-            name: items[weapon].name,
+            name: items[weapon]!.name,
         },
     };
 }
@@ -198,8 +202,8 @@ export function getSkins(state: State, languageResource: LanguageResource, langu
     const skins = [
         ...(itemsGame.alternate_icons2.weapon_icons
             ? Object.entries(itemsGame.alternate_icons2.weapon_icons)
-                  .filter(([, item]: [string, WeaponIcon]) => isSkin(item.icon_path))
-                  .map(([key, item]: [string, WeaponIcon]) =>
+                  .filter(([, item]) => isSkin(item.icon_path))
+                  .map(([key, item]) =>
                       parseItem({ ...item, object_id: key }, items, state, languageResource, language)
                   )
             : []),
@@ -251,7 +255,7 @@ export function getSkins(state: State, languageResource: LanguageResource, langu
                 name: knife.name,
             },
         })),
-    ].filter((skin: any) => !skin.name.includes("null") && skin.rarity.id);
+    ].filter(skin => !skin.name.includes("null") && skin.rarity.id);
 
     return skins;
 }

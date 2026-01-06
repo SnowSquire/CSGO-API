@@ -80,12 +80,10 @@ function parseItemSealedGraffiti(
                 },
                 special_notes: specialNotes?.[`graffiti-${item.object_id}` as keyof typeof specialNotes],
                 crates:
-                    cratesBySkins?.[`graffiti-${item.object_id}` as keyof typeof cratesBySkins]?.map(
-                        (i: any) => ({
-                            ...i,
-                            name: $t(i.name, false, languageResource),
-                        })
-                    ) ?? [],
+                    cratesBySkins?.[`graffiti-${item.object_id}` as keyof typeof cratesBySkins]?.map(i => ({
+                        ...i,
+                        name: $t(i.name, false, languageResource),
+                    })) ?? [],
                 market_hash_name: getMarketHashName(item, colorKey, languageResource),
                 image:
                     cdnImages[`econ/stickers/${item.sticker_material}_${index}`] ??
@@ -112,7 +110,7 @@ function parseItemSealedGraffiti(
         },
         special_notes: specialNotes?.[`graffiti-${item.object_id}` as keyof typeof specialNotes],
         crates:
-            cratesBySkins?.[`graffiti-${item.object_id}` as keyof typeof cratesBySkins]?.map((i: any) => ({
+            cratesBySkins?.[`graffiti-${item.object_id}` as keyof typeof cratesBySkins]?.map(i => ({
                 ...i,
                 name: $t(i.name, false, languageResource),
             })) ?? [],
@@ -139,8 +137,7 @@ export function getGraffiti(
 
     const graffiti = stickerKits
         .filter(isGraffiti)
-        .map(item => parseItemSealedGraffiti(item, state, languageResource))
-        .flatMap(level1 => level1);
+        .flatMap(item => parseItemSealedGraffiti(item, state, languageResource));
 
     return graffiti;
 }

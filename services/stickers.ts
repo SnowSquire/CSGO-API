@@ -181,13 +181,13 @@ function parseItem(
               },
         special_notes: specialNotes?.[`sticker-${item.object_id}` as keyof typeof specialNotes],
         crates:
-            cratesBySkins?.[`sticker-${item.object_id}` as keyof typeof cratesBySkins]?.map((i: any) => ({
+            cratesBySkins?.[`sticker-${item.object_id}` as keyof typeof cratesBySkins]?.map(i => ({
                 ...i,
                 name: $t(i.name, false, languageResource),
             })) ?? [],
         collections:
             collectionsByStickers?.[`sticker-${item.object_id}` as keyof typeof collectionsByStickers]?.map(
-                (i: any) => ({
+                i => ({
                     ...i,
                     name: $t(i.name, false, languageResource),
                 })

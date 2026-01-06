@@ -133,7 +133,7 @@ export async function loadItemsGame(): Promise<ItemsGame> {
         "https://raw.githubusercontent.com/ByMykel/counter-strike-image-tracker/refs/heads/main/static/default_generated.json"
     );
     itemsGame.alternate_icons2.weapon_icons = (iconsResponse.data as string[])
-        .filter((item: string) => {
+        .filter(item => {
             // We have heavy, light and medium
             if (!item.includes("light_png.png")) return false;
             // Chickens
@@ -141,7 +141,7 @@ export async function loadItemsGame(): Promise<ItemsGame> {
             return true;
         })
         .reduce(
-            (acc: Record<string, { icon_path: string }>, item: string) => {
+            (acc, item) => {
                 acc[sha1(item.replace("_light_png.png", "")).slice(0, 12)] = {
                     icon_path: `econ/default_generated/${item.replace("_png.png", "")}`,
                 };
@@ -791,9 +791,9 @@ export function loadProTeams(itemsGame: ItemsGame): Record<string, ProcessedProT
     return Object.entries(itemsGame.pro_teams).reduce(
         (acc, [id, item]) => {
             acc[id] = {
-                id: parseInt(id),
+                id: parseInt(id, 10),
                 tag: item.tag,
-                geo: item.geo ?? "",
+                ...(item.geo ? { geo: item.geo } : {}),
             };
             return acc;
         },
@@ -805,7 +805,7 @@ export function loadProPlayers(itemsGame: ItemsGame): Record<string, ProcessedPr
     return Object.entries(itemsGame.pro_players).reduce(
         (acc, [id, item]) => {
             acc[id] = {
-                id: parseInt(id),
+                id: parseInt(id, 10),
                 name: item.name,
                 code: item.code,
                 dob: item.dob,

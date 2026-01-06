@@ -119,7 +119,10 @@ export function getMusicKits(
 
     const musicKits = musicDefinitions
         .map(item => parseItem(item, state, languageResource))
-        .reduce((acc: any[], kits: any[]) => acc.concat(kits), []);
+        .reduce((acc, kits) => {
+            acc.push(...kits);
+            return acc;
+        }, []);
 
     return musicKits;
 }

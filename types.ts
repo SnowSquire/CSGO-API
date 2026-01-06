@@ -532,7 +532,7 @@ export type ProcessedHighlightReel = {
 export type ProcessedProTeam = {
     id: number;
     tag: string;
-    geo: string;
+    geo?: string;
 };
 
 export type ProcessedProPlayer = {

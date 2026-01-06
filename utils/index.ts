@@ -62,7 +62,7 @@ export const weaponsNames = [
     "motorcycle_gloves",
     "specialist_gloves",
     "studded_hydra_gloves",
-];
+] as const;
 
 export const weaponIDMapping = {
     weapon_taser: 31,
@@ -140,7 +140,7 @@ export const weaponIDMapping = {
     weapon_knife: 42,
     t_gloves: 5028,
     ct_gloves: 5029,
-};
+} as const;
 
 export const knives = [
     {
@@ -243,9 +243,9 @@ export const knives = [
         item_name: "sfui_wpnhud_knife_kukri",
         item_description: "csgo_item_desc_knife_kukri",
     },
-];
+] as const;
 
-export function getWeaponName(string) {
+export function getWeaponName(string: string) {
     for (const weapon of weaponsNames) {
         if (string.includes(weapon)) {
             return weapon;
@@ -255,13 +255,13 @@ export function getWeaponName(string) {
     return false;
 }
 
-export function isNotWeapon(string) {
+export function isNotWeapon(string: string) {
     return (
         !string.includes("weapon_") || string.includes("weapon_knife") || string.includes("weapon_bayonet")
     );
 }
 
-export function getCategory(weapon) {
+export function getCategory(weapon: string) {
     switch (weapon) {
         case "weapon_deagle":
         case "weapon_elite":
@@ -338,7 +338,7 @@ export function getCategory(weapon) {
     return null;
 }
 
-export function getWears(minFloat, maxFloat) {
+export function getWears(minFloat: number, maxFloat: number) {
     const wears = [
         { wear: "SFUI_InvTooltip_Wear_Amount_0", min: 0.0, max: 0.07 },
         { wear: "SFUI_InvTooltip_Wear_Amount_1", min: 0.07, max: 0.15 },
@@ -350,8 +350,8 @@ export function getWears(minFloat, maxFloat) {
     return wears.filter(range => range.max > minFloat && range.min < maxFloat).map(range => range.wear);
 }
 
-export function getDopplerPhase(paintIndex) {
-    const dopplerPhases = {
+export function getDopplerPhase(paintIndex: number): string | undefined {
+    const dopplerPhases: Record<number, string> = {
         // Doppler
         415: "Ruby",
         416: "Sapphire",
@@ -390,11 +390,27 @@ export function getDopplerPhase(paintIndex) {
     return dopplerPhases?.[paintIndex];
 }
 
-export function isExclusive(name) {
+export function isExclusive(name: string) {
     return ["halo_01", "hlalyx_01", "hades_01"].includes(name);
 }
 
-export function skinMarketHashName({ itemName, pattern, wear, isStatTrak, isSouvenir, isWeapon, isVanilla }) {
+export function skinMarketHashName({
+    itemName,
+    pattern,
+    wear,
+    isStatTrak,
+    isSouvenir,
+    isWeapon,
+    isVanilla,
+}: {
+    itemName: string;
+    pattern: string;
+    wear: string;
+    isStatTrak: boolean;
+    isSouvenir: boolean;
+    isWeapon: boolean;
+    isVanilla: boolean;
+}) {
     if (isWeapon) {
         if (isStatTrak) {
             return `StatTrak™ ${itemName} | ${pattern} (${wear})`;
@@ -422,7 +438,7 @@ export function skinMarketHashName({ itemName, pattern, wear, isStatTrak, isSouv
     }
 }
 
-export function getCollectibleRarity(prefab) {
+export function getCollectibleRarity(prefab: string) {
     const keys = prefab.split(" ");
 
     for (const key of keys) {
@@ -497,7 +513,7 @@ export function getRarityColor(id: string) {
     }
 }
 
-export function filterUniqueByAttribute(items, attribute) {
+export function filterUniqueByAttribute<T>(items: T[], attribute: keyof T): T[] {
     const uniqueValues = new Set();
     return items.filter(item => {
         if (!uniqueValues.has(item[attribute])) {
@@ -508,7 +524,7 @@ export function filterUniqueByAttribute(items, attribute) {
     });
 }
 
-export function formatIconPath(icon_path, wear) {
+export function formatIconPath(icon_path: string, wear: string) {
     // SFUI_InvTooltip_Wear_Amount_0 - Factory New - light
     // SFUI_InvTooltip_Wear_Amount_1 - Minimal Wear - light
     // SFUI_InvTooltip_Wear_Amount_2 - Field-Tested - medium
@@ -526,7 +542,7 @@ export function formatIconPath(icon_path, wear) {
     return icon_path;
 }
 
-export function getGraffitiVariations(material) {
+export function getGraffitiVariations(material: string) {
     return (
         {
             spray_std_axes_crossed: [0],
@@ -632,7 +648,7 @@ export function getGraffitiVariations(material) {
     );
 }
 
-export function getFinishStyleLink(id) {
+export function getFinishStyleLink(id: number) {
     switch (id) {
         // "SFUI_ItemInfo_FinishStyle_1": "Solid Color",
         case 1:
@@ -667,8 +683,8 @@ export function getFinishStyleLink(id) {
     return null;
 }
 
-export function getPlayerNameOfHighlight(id, players) {
-    id = id.split("_")[1];
+export function getPlayerNameOfHighlight(id: string, players: Record<string, string>) {
+    id = id.split("_")[1]!;
 
     if (id.startsWith("shiro")) id = id.replace("shiro", "sh1ro");
     if (id.startsWith("magix")) id = id.replace("magix", "magixx");

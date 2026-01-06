@@ -82,14 +82,19 @@ function getCrateType(item: ProcessedItem): string | null {
     return null;
 }
 
-function getFirstSaleDate(item: ProcessedItem, prefabs: Record<string, ProcessedPrefab>) {
+function getFirstSaleDate(
+    item: ProcessedItem,
+    prefabs: Record<string, ProcessedPrefab>,
+    itemsGame: State["itemsGame"]
+) {
     if (item.first_sale_date !== undefined) {
         return item.first_sale_date;
     }
 
     if (item.associated_items !== undefined) {
         const id = Object.keys(item.associated_items)[0]!;
-        return prefabs[id]?.first_sale_date;
+
+        return itemsGame.items[id]?.first_sale_date;
     }
 
     if (item.prefab !== undefined) {
@@ -114,11 +119,12 @@ function parseItem(
         skinsByCrates: State["skinsByCrates"];
         revolvingLootLists: State["revolvingLootLists"];
         cdnImages: State["cdnImages"];
+        itemsGame: State["itemsGame"];
     },
     languageResource: LanguageResource,
     language: CustomTranslation
 ) {
-    const { skinsByCrates, revolvingLootLists, cdnImages } = state;
+    const { skinsByCrates, revolvingLootLists, cdnImages, itemsGame } = state;
 
     const image =
         cdnImages[item.image_inventory!.toLowerCase()] ?? getImageUrl(item.image_inventory!.toLowerCase());
@@ -141,7 +147,7 @@ function parseItem(
             $t(item.item_description_prefab ?? "", false, languageResource),
         def_index: item.object_id,
         type: getCrateType(item),
-        first_sale_date: getFirstSaleDate(item, prefabs),
+        first_sale_date: getFirstSaleDate(item, prefabs, itemsGame),
         rarity: {
             id: "rarity_common",
             name: $t("rarity_common", false, languageResource),
@@ -249,6 +255,7 @@ export function getCrates(
         skinsByCrates: State["skinsByCrates"];
         revolvingLootLists: State["revolvingLootLists"];
         cdnImages: State["cdnImages"];
+        itemsGame: State["itemsGame"];
     },
     languageResource: LanguageResource,
     language: CustomTranslation

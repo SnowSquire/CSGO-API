@@ -9,7 +9,7 @@ function isKeychain(item: ProcessedKeychainDefinition): boolean {
         return false;
     }
 
-    if ((item as any)["is commodity"]) {
+    if (item["is commodity"]) {
         return false;
     }
 
@@ -43,7 +43,7 @@ function parseItem(
             color: getRarityColor(`rarity_${item.item_rarity}`),
         },
         collections:
-            collectionsBySkins?.[`keychain-${item.object_id}`]?.map((i: any) => ({
+            collectionsBySkins[`keychain-${item.object_id}`]?.map(i => ({
                 ...i,
                 name: $t(i.name, false, languageResource),
             })) ?? [],
