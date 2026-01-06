@@ -81,12 +81,9 @@ function parseItem(
     languageResource: LanguageResource,
     language: CustomTranslation
 ) {
-    if (item.object_id === "fdaa4d4bbf34") {
-        debugger;
-    }
     const { rarities, paintKits, cratesBySkins, souvenirSkins, collectionsBySkins, cdnImages } = state;
     const [weapon, pattern] = getSkinInfo(item.icon_path);
-    const dopplerPhase = getDopplerPhase(paintKits[pattern]?.paint_index);
+    const dopplerPhase = getDopplerPhase(paintKits[pattern]?.paint_index || "");
     const image =
         cdnImages[`${item.icon_path.toLowerCase()}`] ??
         cdnImages[`${item.icon_path.toLowerCase().replace(/_light$/, "_medium")}`] ??
@@ -128,7 +125,7 @@ function parseItem(
                   "rare_special",
                   {
                       item_name: translatedName,
-                      pattern: $t(paintKits[pattern]?.description_tag ?? "", false, languageResource) || null,
+                      pattern: $t(paintKits[pattern]?.description_tag ?? "", false, languageResource) || "",
                   },
                   language
               )
@@ -159,12 +156,13 @@ function parseItem(
         stattrak: isStatTrak,
         souvenir: souvenirSkins?.[`skin-${item.object_id}`] ?? false,
         paint_index: paintKits[pattern]?.paint_index,
-        wears: getWears(paintKits[pattern]?.wear_remap_min, paintKits[pattern]?.wear_remap_max).map(
-            wearKey => ({
-                id: wearKey,
-                name: $t(wearKey, false, languageResource) ?? "",
-            })
-        ),
+        wears: getWears(
+            Number(paintKits[pattern]?.wear_remap_min),
+            Number(paintKits[pattern]?.wear_remap_max)
+        ).map(wearKey => ({
+            id: wearKey,
+            name: $t(wearKey, false, languageResource) ?? "",
+        })),
         collections:
             collectionsBySkins?.[`skin-${item.object_id}` as keyof typeof collectionsBySkins]?.map(i => ({
                 ...i,

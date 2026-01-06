@@ -1,5 +1,4 @@
 import { regex, type } from "arktype";
-import axios from "axios";
 import sha1 from "sha1";
 import { getImageUrl, IMAGES_INVENTORY_URL, ITEMS_GAME_URL } from "../constants";
 import {
@@ -57,7 +56,7 @@ export type State = {
     highlightReels: Array<ProcessedHighlightReel>;
     proTeams: Record<string, ProcessedProTeam>;
     proPlayers: Record<string, ProcessedProPlayer>;
-    cdnImages: Record<string, string>;
+    cdnImages: Record<string, string | null>;
 };
 
 // Context object passed to functions that need multiple state properties
@@ -69,7 +68,7 @@ type GetItemFromKeyContext = {
     stickerKitsObj: Record<string, ProcessedStickerKit>;
     musicDefinitionsObj: Record<string, ProcessedMusicDefinition>;
     keychainDefinitionsObj: Record<string, ProcessedKeychainDefinition>;
-    cdnImages: Record<string, string>;
+    cdnImages: Record<string, string | null>;
 };
 
 export async function loadItemsGame(): Promise<ItemsGame> {
@@ -129,10 +128,14 @@ export async function loadItemsGame(): Promise<ItemsGame> {
     });
 
     // Load weapon icons
-    const iconsResponse = await axios.get(
+
+    const iconsResponse = await fetch(
         "https://raw.githubusercontent.com/ByMykel/counter-strike-image-tracker/refs/heads/main/static/default_generated.json"
     );
-    itemsGame.alternate_icons2.weapon_icons = (iconsResponse.data as string[])
+    const iconArray = type("string.json.parse")
+        .to("string[]")
+        .assert(await iconsResponse.text());
+    itemsGame.alternate_icons2.weapon_icons = iconArray
         .filter(item => {
             // We have heavy, light and medium
             if (!item.includes("light_png.png")) return false;
@@ -455,7 +458,7 @@ export function loadCratesBySkins(
     skinsByCrates: Record<string, SkinItem[]>,
     revolvingLootLists: ItemsGame["revolving_loot_lists"],
     items: Record<string, ProcessedItem>,
-    cdnImages: Record<string, string>
+    cdnImages: Record<string, string | null>
 ): Record<string, CrateInfo[]> {
     const hardCodedCrates: Record<string, { object_id: number; item_name: string; image_inventory: string }> =
         {
@@ -610,7 +613,7 @@ export function loadCratesByCollections(
 export function loadCollectionsBySkins(
     skinsByCollections: Record<string, SkinItem[]>,
     itemSets: ItemsGame["item_sets"],
-    cdnImages: Record<string, string>
+    cdnImages: Record<string, string | null>
 ): Record<string, CollectionInfo[]> {
     return Object.entries(skinsByCollections).reduce(
         (acc, [crateKey, itemsList]) => {
@@ -642,7 +645,7 @@ export function loadCollectionsBySkins(
 
 export function loadCollectionsByStickers(
     itemSets: ItemsGame["item_sets"],
-    cdnImages: Record<string, string>,
+    cdnImages: Record<string, string | null>,
     getItemFromKeyFn: (key: string) => SkinItem | SkinItem[] | null | undefined
 ): Record<string, CollectionInfo[]> {
     return Object.entries(itemSets)
@@ -817,9 +820,11 @@ export function loadProPlayers(itemsGame: ItemsGame): Record<string, ProcessedPr
     );
 }
 
-export async function loadImagesInventory(): Promise<Record<string, string>> {
-    const response = await axios.get(IMAGES_INVENTORY_URL);
-    return response.data as Record<string, string>;
+export async function loadImagesInventory(): Promise<Record<string, string | null>> {
+    const response = await fetch(IMAGES_INVENTORY_URL);
+    return type("string.json.parse")
+        .pipe(type.Record("string", "string.url | null"))
+        .assert(await response.text());
 }
 
 function getItemFromKey(key: string, ctx: GetItemFromKeyContext): SkinItem | SkinItem[] | null {
@@ -1035,7 +1040,7 @@ function getItemFromKey(key: string, ctx: GetItemFromKeyContext): SkinItem | Ski
                 pattern: paintKit.description_tag.replace("#", ""),
             };
             paint_index = paintKit.paint_index;
-            phase = getDopplerPhase(paintKit.paint_index);
+            phase = getDopplerPhase(paintKit.paint_index) ?? null;
             image =
                 cdnImages[`${weaponIconEntry[1].icon_path.toLowerCase()}`] ??
                 cdnImages[`${weaponIconEntry[1].icon_path.toLowerCase().replace(/_light$/, "_medium")}`] ??
@@ -1063,7 +1068,8 @@ export async function getManifestId(): Promise<string> {
     );
     const data = (await response.json()) as { content: string };
     // Decode base64 content and trim whitespace
-    return Uint8Array.fromBase64(data.content).toString().trim();
+    const decodedContent = new TextDecoder().decode(Uint8Array.fromBase64(data.content)).trim();
+    return decodedContent;
 }
 
 export async function loadData(): Promise<State> {

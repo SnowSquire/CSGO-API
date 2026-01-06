@@ -118,7 +118,7 @@ function parseItem(
 
     const isKnife = weapon.includes("weapon_knife") || weapon.includes("weapon_bayonet");
 
-    const dopplerPhase = getDopplerPhase(paintKits[pattern]?.paint_index);
+    const dopplerPhase = getDopplerPhase(paintKits[pattern]?.paint_index || "");
 
     const rarity = !isNotWeapon(weapon)
         ? rarities[`[${pattern}]${weapon}`]?.rarity
@@ -141,7 +141,10 @@ function parseItem(
         types.push("skin_souvenir");
     }
 
-    const wears = getWears(paintKits[pattern]?.wear_remap_min, paintKits[pattern]?.wear_remap_max);
+    const wears = getWears(
+        Number(paintKits[pattern]?.wear_remap_min),
+        Number(paintKits[pattern]?.wear_remap_max)
+    );
 
     const team =
         !items[weapon]?.used_by_classes || Object.keys(items[weapon]!.used_by_classes).length === 2
@@ -157,8 +160,9 @@ function parseItem(
                       type === "skin_stattrak" ? "rare_special_with_wear_stattrak" : "rare_special_with_wear",
                       {
                           item_name: translatedName,
-                          pattern: $t(paintKits[pattern]?.description_tag || "", false, languageResource),
-                          wear: $t(wear, false, languageResource),
+                          pattern:
+                              $t(paintKits[pattern]?.description_tag || "", false, languageResource) ?? "",
+                          wear: $t(wear, false, languageResource) ?? "",
                       },
                       language
                   )
@@ -166,8 +170,9 @@ function parseItem(
                       type as "skin" | "skin_stattrak" | "skin_souvenir",
                       {
                           item_name: translatedName,
-                          pattern: $t(paintKits[pattern]?.description_tag || "", false, languageResource),
-                          wear: $t(wear, false, languageResource),
+                          pattern:
+                              $t(paintKits[pattern]?.description_tag || "", false, languageResource) ?? "",
+                          wear: $t(wear, false, languageResource) ?? "",
                       },
                       language
                   ),

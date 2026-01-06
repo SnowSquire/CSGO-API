@@ -1,5 +1,5 @@
 import { type } from "arktype";
-import axios from "axios";
+
 import type { CustomTranslation } from "../types";
 import customTranslations from "../utils/translations.json" with { type: "json" };
 
@@ -88,8 +88,10 @@ const TranslationData = type({
 });
 
 export async function getTranslations(url: string) {
-    const res = await axios.get(url);
-    const langData = TranslationData.assert(res.data);
+    const res = await fetch(url);
+    const langData = type("string.json.parse")
+        .pipe(TranslationData)
+        .assert(await res.text());
 
     const lowerCaseKeys = Object.fromEntries(
         Object.entries(langData.lang.Tokens).map(([key, val]) => [key.toLowerCase(), val])
@@ -102,26 +104,3 @@ export async function getTranslations(url: string) {
 
     return { lowerCaseKeys, lowerCaseKeysIdx };
 }
-
-// export async function loadTranslations({ language, url, folder }: (typeof LANGUAGES_URL)[number]) {
-//     if (wherrrrrrrrrr.default == null) {
-//         await getTranslations(CSGO_ENGLISH_URL)
-//             .then(data => {
-//                 wherrrrrrrrrr.default = data.lowerCaseKeys;
-//                 wherrrrrrrrrr.default_idx = data.lowerCaseKeysIdx;
-//             })
-//             .catch(() => {
-//                 throw new Error(`Error loading translations from ${CSGO_ENGLISH_URL}`);
-//             });
-//     }
-
-//     await getTranslations(url)
-//         .then(data => {
-//             languageData = { language, folder };
-//             wherrrrrrrrrr.selected = data.lowerCaseKeys;
-//             wherrrrrrrrrr.selected_idx = data.lowerCaseKeysIdx;
-//         })
-//         .catch(() => {
-//             throw new Error(`Error loading translations from ${url}`);
-//         });
-// }

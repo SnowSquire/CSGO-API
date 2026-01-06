@@ -350,8 +350,8 @@ export function getWears(minFloat: number, maxFloat: number) {
     return wears.filter(range => range.max > minFloat && range.min < maxFloat).map(range => range.wear);
 }
 
-export function getDopplerPhase(paintIndex: number): string | undefined {
-    const dopplerPhases: Record<number, string> = {
+export function getDopplerPhase(paintIndex: string): string | undefined {
+    const dopplerPhases: Record<string, string> = {
         // Doppler
         415: "Ruby",
         416: "Sapphire",
@@ -404,8 +404,8 @@ export function skinMarketHashName({
     isVanilla,
 }: {
     itemName: string;
-    pattern: string;
-    wear: string;
+    pattern: string | null;
+    wear: string | null;
     isStatTrak: boolean;
     isSouvenir: boolean;
     isWeapon: boolean;

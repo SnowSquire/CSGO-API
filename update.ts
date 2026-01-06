@@ -2,8 +2,6 @@ import { configure } from "arktype/config";
 
 configure({ onUndeclaredKey: "reject" });
 
-import * as fs from "node:fs/promises";
-
 import { DEFAULT_LANGUAGE, LANGUAGES_URL } from "./constants.js";
 import { getAgents } from "./services/agents.js";
 import { getBaseWeapons } from "./services/baseWeapons.js";
@@ -123,7 +121,7 @@ async function main() {
         }
     }
     await Bun.write("state.json", JSON.stringify(appState, null, 2));
-    await fs.writeFile("./manifestIdUpdate.txt", latestManifestId.toString());
+    await Bun.write("./manifestIdUpdate.txt", latestManifestId.toString());
 }
 if (import.meta.main) {
     main();

@@ -97,7 +97,6 @@ function parseItemSealedGraffiti(
             };
         });
     }
-
     return {
         id: `graffiti-${item.object_id}`,
         name: `${$t("csgo_tool_spray", false, languageResource)} | ${$t(item.item_name!, false, languageResource)}`,
@@ -137,6 +136,7 @@ export function getGraffiti(
 
     const graffiti = stickerKits
         .filter(isGraffiti)
+        // @ts-expect-error this is a typescript bug for the inference on the returntype of parseItemSealedGraffiti i'm pretty sure, lol
         .flatMap(item => parseItemSealedGraffiti(item, state, languageResource));
 
     return graffiti;

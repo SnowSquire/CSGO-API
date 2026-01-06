@@ -5,7 +5,6 @@
     "dependencies": {
         "@biomejs/biome": "^2.3.10",
         "arktype": "^2.1.29",
-        "axios": "^1.13.2",
         "sha1": "^1.1.1"
     },
     "devDependencies": {
@@ -23,7 +22,6 @@
         "group-data": "bun group.js",
         "update-data-force": "bun update.js --force",
         "group-data-force": "bun group.js --force",
-        "generate-docs": "bun scripts/generate-docs.js",
-        "format": "prettier --write \"**/*.js\" --ignore-path .gitignore"
+        "generate-docs": "bun scripts/generate-docs.js"
     }
 }
